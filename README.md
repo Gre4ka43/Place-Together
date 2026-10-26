@@ -14,7 +14,7 @@ All participants must be connected to the same virtual local network. You can us
 
 - [Radmin VPN](https://www.radmin-vpn.com/)
 - [Hamachi](https://vpn.net/)
-- [Porthole](https://github.com/Gre4ka43/Place-Together)
+- [Porthole](https://store.steampowered.com/app/4963920/Porthole_Local_Port_Sharing/)
 
 Create or join the same virtual network and make sure all participants can reach the host computer.
 
