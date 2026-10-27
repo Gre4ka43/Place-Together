@@ -1,102 +1,107 @@
-<roblox version="4"><External>null</External><External>nil</External><Item class="Script" referent="RBX0"><Properties><string name="Name">PlaceTogether</string><ProtectedString name="Source">-- PlaceTogether 2.0: Real-time Collaborative Building in Roblox Studio
-local Http = game:GetService(&quot;HttpService&quot;)
-local Editor = game:GetService(&quot;ScriptEditorService&quot;)
-local Run = game:GetService(&quot;RunService&quot;)
-local InsertService = game:GetService(&quot;InsertService&quot;)
-local roots = {&quot;Workspace&quot;, &quot;ReplicatedStorage&quot;, &quot;ReplicatedFirst&quot;, &quot;ServerScriptService&quot;, &quot;ServerStorage&quot;, &quot;StarterGui&quot;, &quot;StarterPack&quot;, &quot;StarterPlayer&quot;, &quot;Teams&quot;, &quot;MaterialService&quot;, &quot;TextChatService&quot;, &quot;Lighting&quot;, &quot;SoundService&quot;}
-local serviceIds = {}; for _, name in ipairs(roots) do serviceIds[&quot;@&quot;..name] = true end
-local common = {&quot;Archivable&quot;, &quot;TopSurface&quot;, &quot;BottomSurface&quot;, &quot;LeftSurface&quot;, &quot;RightSurface&quot;, &quot;FrontSurface&quot;, &quot;BackSurface&quot;, &quot;MaterialVariant&quot;}
-local props = {&quot;Anchored&quot;, &quot;CanCollide&quot;, &quot;CanTouch&quot;, &quot;CanQuery&quot;, &quot;Transparency&quot;, &quot;Reflectance&quot;, &quot;Color&quot;, &quot;Material&quot;, &quot;Size&quot;, &quot;CFrame&quot;, &quot;Shape&quot;, &quot;MeshId&quot;, &quot;TextureID&quot;, &quot;TextureId&quot;, &quot;Texture&quot;, &quot;Face&quot;, &quot;Enabled&quot;, &quot;Brightness&quot;, &quot;Range&quot;, &quot;Shadows&quot;, &quot;Angle&quot;, &quot;SoundId&quot;, &quot;Volume&quot;, &quot;Looped&quot;, &quot;PlaybackSpeed&quot;, &quot;Value&quot;, &quot;PrimaryPart&quot;, &quot;Part0&quot;, &quot;Part1&quot;, &quot;C0&quot;, &quot;C1&quot;, &quot;Attachment0&quot;, &quot;Attachment1&quot;, &quot;Position&quot;, &quot;Orientation&quot;, &quot;Axis&quot;, &quot;SecondaryAxis&quot;, &quot;Text&quot;, &quot;TextSize&quot;, &quot;TextColor3&quot;, &quot;BackgroundColor3&quot;, &quot;BackgroundTransparency&quot;, &quot;BorderSizePixel&quot;, &quot;Visible&quot;, &quot;AnchorPoint&quot;, &quot;Image&quot;, &quot;ImageColor3&quot;, &quot;CanvasSize&quot;, &quot;DisplayOrder&quot;, &quot;ResetOnSpawn&quot;, &quot;Disabled&quot;, &quot;Ambient&quot;, &quot;OutdoorAmbient&quot;, &quot;ClockTime&quot;, &quot;FogEnd&quot;, &quot;FogStart&quot;, &quot;FogColor&quot;}
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<External>null</External>
+	<External>nil</External>
+	<Item class="Script" referent="RBXBB3C8BCE355E44D3ABE8F155BAB255D4">
+		<Properties>
+			<ProtectedString name="Source"><![CDATA[-- PlaceTogether 2.0: Real-time Collaborative Building in Roblox Studio
+local Http = game:GetService("HttpService")
+local Editor = game:GetService("ScriptEditorService")
+local Run = game:GetService("RunService")
+local InsertService = game:GetService("InsertService")
+local roots = {"Workspace", "ReplicatedStorage", "ReplicatedFirst", "ServerScriptService", "ServerStorage", "StarterGui", "StarterPack", "StarterPlayer", "Teams", "MaterialService", "TextChatService", "Lighting", "SoundService"}
+local serviceIds = {}; for _, name in ipairs(roots) do serviceIds["@"..name] = true end
+local common = {"Archivable", "TopSurface", "BottomSurface", "LeftSurface", "RightSurface", "FrontSurface", "BackSurface", "MaterialVariant"}
+local props = {"Anchored", "CanCollide", "CanTouch", "CanQuery", "Transparency", "Reflectance", "Color", "Material", "Size", "CFrame", "Shape", "MeshId", "TextureID", "TextureId", "Texture", "Face", "Enabled", "Brightness", "Range", "Shadows", "Angle", "SoundId", "Volume", "Looped", "PlaybackSpeed", "Value", "PrimaryPart", "Part0", "Part1", "C0", "C1", "Attachment0", "Attachment1", "Position", "Orientation", "Axis", "SecondaryAxis", "Text", "TextSize", "TextColor3", "BackgroundColor3", "BackgroundTransparency", "BorderSizePixel", "Visible", "AnchorPoint", "Image", "ImageColor3", "CanvasSize", "DisplayOrder", "ResetOnSpawn", "Disabled", "Ambient", "OutdoorAmbient", "ClockTime", "FogEnd", "FogStart", "FogColor"}
 
-local savedAddress = plugin:GetSetting(&quot;PTAddress&quot;) or &quot;&quot;
-if type(savedAddress) ~= &quot;string&quot; then savedAddress = &quot;&quot; end
+local savedAddress = plugin:GetSetting("PTAddress") or ""
+if type(savedAddress) ~= "string" then savedAddress = "" end
 
-local toolbar = plugin:CreateToolbar(&quot;PlaceTogether&quot;)
-local button = toolbar:CreateButton(&quot;PlaceTogether&quot;, &quot;Collaborative Building&quot;, &quot;&quot;)
-local widget = plugin:CreateDockWidgetPluginGuiAsync(&quot;PlaceTogetherInvites02&quot;, DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Right, false, false, 340, 540, 280, 400))
-widget.Title = &quot;PlaceTogether&quot;
+local toolbar = plugin:CreateToolbar("PlaceTogether")
+local button = toolbar:CreateButton("PlaceTogether", "Collaborative Building", "")
+local widget = plugin:CreateDockWidgetPluginGuiAsync("PlaceTogetherInvites02", DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Right, false, false, 340, 540, 280, 400))
+widget.Title = "PlaceTogether"
 
 local palette = {
-    bg = Color3.fromRGB(15, 17, 23),
-    card = Color3.fromRGB(23, 27, 36),
-    cardBorder = Color3.fromRGB(38, 44, 58),
-    field = Color3.fromRGB(18, 21, 28),
-    fieldBorder = Color3.fromRGB(48, 56, 74),
-    fieldFocus = Color3.fromRGB(90, 145, 255),
-    line = Color3.fromRGB(38, 44, 58),
-    text = Color3.fromRGB(248, 250, 252),
-    muted = Color3.fromRGB(148, 163, 184),
-    subtle = Color3.fromRGB(100, 116, 139),
-    accent = Color3.fromRGB(59, 130, 246),
-    accentBorder = Color3.fromRGB(96, 165, 250),
-    ink = Color3.fromRGB(255, 255, 255),
-    green = Color3.fromRGB(34, 197, 94),
-    greenBg = Color3.fromRGB(20, 48, 32),
-    danger = Color3.fromRGB(239, 68, 68),
-    dangerBg = Color3.fromRGB(45, 22, 26),
-    dangerBorder = Color3.fromRGB(120, 40, 50),
-    tabBg = Color3.fromRGB(19, 21, 29),
-    tabActive = Color3.fromRGB(35, 42, 58),
+	bg = Color3.fromRGB(15, 17, 23),
+	card = Color3.fromRGB(23, 27, 36),
+	cardBorder = Color3.fromRGB(38, 44, 58),
+	field = Color3.fromRGB(18, 21, 28),
+	fieldBorder = Color3.fromRGB(48, 56, 74),
+	fieldFocus = Color3.fromRGB(90, 145, 255),
+	line = Color3.fromRGB(38, 44, 58),
+	text = Color3.fromRGB(248, 250, 252),
+	muted = Color3.fromRGB(148, 163, 184),
+	subtle = Color3.fromRGB(100, 116, 139),
+	accent = Color3.fromRGB(59, 130, 246),
+	accentBorder = Color3.fromRGB(96, 165, 250),
+	ink = Color3.fromRGB(255, 255, 255),
+	green = Color3.fromRGB(34, 197, 94),
+	greenBg = Color3.fromRGB(20, 48, 32),
+	danger = Color3.fromRGB(239, 68, 68),
+	dangerBg = Color3.fromRGB(45, 22, 26),
+	dangerBorder = Color3.fromRGB(120, 40, 50),
+	tabBg = Color3.fromRGB(19, 21, 29),
+	tabActive = Color3.fromRGB(35, 42, 58),
 }
 
 local loggedIn = false
 local guestEnter
-local uiTab = &quot;home&quot;
+local uiTab = "home"
 
-local frame = Instance.new(&quot;Frame&quot;)
-frame.Name = &quot;PlaceTogetherUI&quot;
+local frame = Instance.new("Frame")
+frame.Name = "PlaceTogetherUI"
 frame.Size = UDim2.fromScale(1, 1)
 frame.BackgroundColor3 = palette.bg
 frame.BorderSizePixel = 0
 frame.Parent = widget
 
 local function corner(obj, r)
-    local c = Instance.new(&quot;UICorner&quot;)
-    c.CornerRadius = UDim.new(0, r or 8)
-    c.Parent = obj
-    return c
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, r or 8)
+	c.Parent = obj
+	return c
 end
 
 local function stroke(obj, color, thickness)
-    local s = Instance.new(&quot;UIStroke&quot;)
-    s.Color = color or palette.line
-    s.Thickness = thickness or 1
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    s.Parent = obj
-    return s
+	local s = Instance.new("UIStroke")
+	s.Color = color or palette.line
+	s.Thickness = thickness or 1
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	s.Parent = obj
+	return s
 end
 
 local function pad(obj, n, nY)
-    local p = Instance.new(&quot;UIPadding&quot;)
-    p.PaddingLeft = UDim.new(0, n)
-    p.PaddingRight = UDim.new(0, n)
-    p.PaddingTop = UDim.new(0, nY or n)
-    p.PaddingBottom = UDim.new(0, nY or n)
-    p.Parent = obj
-    return p
+	local p = Instance.new("UIPadding")
+	p.PaddingLeft = UDim.new(0, n)
+	p.PaddingRight = UDim.new(0, n)
+	p.PaddingTop = UDim.new(0, nY or n)
+	p.PaddingBottom = UDim.new(0, nY or n)
+	p.Parent = obj
+	return p
 end
 
 local function stack(obj, gap)
-    local l = Instance.new(&quot;UIListLayout&quot;)
-    l.Padding = UDim.new(0, gap or 10)
-    l.SortOrder = Enum.SortOrder.LayoutOrder
-    l.Parent = obj
-    return l
+	local l = Instance.new("UIListLayout")
+	l.Padding = UDim.new(0, gap or 10)
+	l.SortOrder = Enum.SortOrder.LayoutOrder
+	l.Parent = obj
+	return l
 end
 
 local function container(parent, name)
-    local f = Instance.new(&quot;Frame&quot;)
-    f.Name = name
-    f.Size = UDim2.new(1, 0, 0, 0)
-    f.AutomaticSize = Enum.AutomaticSize.Y
-    f.BackgroundTransparency = 1
-    f.Parent = parent
-    stack(f, 10)
-    return f
+	local f = Instance.new("Frame")
+	f.Name = name
+	f.Size = UDim2.new(1, 0, 0, 0)
+	f.AutomaticSize = Enum.AutomaticSize.Y
+	f.BackgroundTransparency = 1
+	f.Parent = parent
+	stack(f, 10)
+	return f
 end
 
-local body = Instance.new(&quot;ScrollingFrame&quot;)
-body.Name = &quot;Content&quot;
+local body = Instance.new("ScrollingFrame")
+body.Name = "Content"
 body.Position = UDim2.new(0, 16, 0, 108)
 body.Size = UDim2.new(1, -32, 1, -158)
 body.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -110,114 +115,112 @@ body.Parent = frame
 local currentParent = body
 
 local function textLabel(text, height, parent)
-    local l = Instance.new(&quot;TextLabel&quot;)
-    l.Size = UDim2.new(1, 0, 0, height or 20)
-    l.AutomaticSize = Enum.AutomaticSize.Y
-    l.Text = text
-    l.TextColor3 = palette.muted
-    l.BackgroundTransparency = 1
-    l.TextWrapped = true
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.TextYAlignment = Enum.TextYAlignment.Top
-    l.Font = Enum.Font.Gotham
-    l.TextSize = 13
-    l.Parent = parent or currentParent
-    return l
+	local l = Instance.new("TextLabel")
+	l.Size = UDim2.new(1, 0, 0, height or 20)
+	l.AutomaticSize = Enum.AutomaticSize.Y
+	l.Text = text
+	l.TextColor3 = palette.muted
+	l.BackgroundTransparency = 1
+	l.TextWrapped = true
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.TextYAlignment = Enum.TextYAlignment.Top
+	l.Font = Enum.Font.Gotham
+	l.TextSize = 13
+	l.Parent = parent or currentParent
+	return l
 end
 
 local function title(text, parent)
-    local l = textLabel(text, 22, parent)
-    l.Font = Enum.Font.GothamBold
-    l.TextSize = 16
-    l.TextColor3 = palette.text
-    return l
+	local l = textLabel(text, 22, parent)
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = 16
+	l.TextColor3 = palette.text
+	return l
 end
 
 local function field(placeholder, text, parent)
-    local box = Instance.new(&quot;TextBox&quot;)
-    box.Size = UDim2.new(1, 0, 0, 38)
-    box.Text = text or &quot;&quot;
-    box.PlaceholderText = placeholder
-    box.ClearTextOnFocus = false
-    box.TextColor3 = palette.text
-    box.PlaceholderColor3 = palette.subtle
-    box.BackgroundColor3 = palette.field
-    box.BorderSizePixel = 0
-    box.Font = Enum.Font.GothamMedium
-    box.TextSize = 13
-    box.TextXAlignment = Enum.TextXAlignment.Left
-    box.Parent = parent or currentParent
-    corner(box, 8)
-    pad(box, 12, 0)
-    local s = stroke(box, palette.fieldBorder, 1)
-    box.Focused:Connect(function()
-        s.Color = palette.fieldFocus
-        s.Thickness = 1.5
-    end)
-    box.FocusLost:Connect(function()
-        s.Color = palette.fieldBorder
-        s.Thickness = 1
-    end)
-    return box
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(1, 0, 0, 38)
+	box.Text = text or ""
+	box.PlaceholderText = placeholder
+	box.ClearTextOnFocus = false
+	box.TextColor3 = palette.text
+	box.PlaceholderColor3 = palette.subtle
+	box.BackgroundColor3 = palette.field
+	box.BorderSizePixel = 0
+	box.Font = Enum.Font.GothamMedium
+	box.TextSize = 13
+	box.TextXAlignment = Enum.TextXAlignment.Left
+	box.Parent = parent or currentParent
+	corner(box, 8)
+	pad(box, 12, 0)
+	local s = stroke(box, palette.fieldBorder, 1)
+	box.Focused:Connect(function()
+		s.Color = palette.fieldFocus
+		s.Thickness = 1.5
+	end)
+	box.FocusLost:Connect(function()
+		s.Color = palette.fieldBorder
+		s.Thickness = 1
+	end)
+	return box
 end
 
 local function makeButton(text, parent, kind)
-    local b = Instance.new(&quot;TextButton&quot;)
-    b.Size = UDim2.new(1, 0, 0, 38)
-    b.Text = text
-    b.Font = Enum.Font.GothamBold
-    b.TextSize = 13
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = true
-    b.Parent = parent or currentParent
-    corner(b, 8)
-    if kind == &quot;primary&quot; then
-        b.TextColor3 = palette.ink
-        b.BackgroundColor3 = palette.accent
-        stroke(b, palette.accentBorder, 1)
-    elseif kind == &quot;danger&quot; then
-        b.TextColor3 = Color3.fromRGB(252, 165, 165)
-        b.BackgroundColor3 = palette.dangerBg
-        stroke(b, palette.dangerBorder, 1)
-    else
-        b.TextColor3 = palette.text
-        b.BackgroundColor3 = Color3.fromRGB(28, 33, 45)
-        b.Font = Enum.Font.GothamMedium
-        stroke(b, palette.line, 1)
-    end
-    return b
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, 0, 0, 38)
+	b.Text = text
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 13
+	b.BorderSizePixel = 0
+	b.AutoButtonColor = true
+	b.Parent = parent or currentParent
+	corner(b, 8)
+	if kind == "primary" then
+		b.TextColor3 = palette.ink
+		b.BackgroundColor3 = palette.accent
+		stroke(b, palette.accentBorder, 1)
+	elseif kind == "danger" then
+		b.TextColor3 = Color3.fromRGB(252, 165, 165)
+		b.BackgroundColor3 = palette.dangerBg
+		stroke(b, palette.dangerBorder, 1)
+	else
+		b.TextColor3 = palette.text
+		b.BackgroundColor3 = Color3.fromRGB(28, 33, 45)
+		b.Font = Enum.Font.GothamMedium
+		stroke(b, palette.line, 1)
+	end
+	return b
 end
 
 local function card(parent, name)
-    local f = container(parent, name)
-    f.BackgroundTransparency = 0
-    f.BackgroundColor3 = palette.card
-    pad(f, 14, 14)
-    corner(f, 10)
-    stroke(f, palette.cardBorder, 1)
-    return f
+	local f = container(parent, name)
+	f.BackgroundTransparency = 0
+	f.BackgroundColor3 = palette.card
+	pad(f, 14, 14)
+	corner(f, 10)
+	stroke(f, palette.cardBorder, 1)
+	return f
 end
 
--- Header with Title &amp; Status Capsule
-local header = Instance.new(&quot;Frame&quot;)
+local header = Instance.new("Frame")
 header.Size = UDim2.new(1, -32, 0, 48)
 header.Position = UDim2.fromOffset(16, 12)
 header.BackgroundTransparency = 1
 header.Parent = frame
 
-local brand = title(&quot;PlaceTogether&quot;, header)
+local brand = title("PlaceTogether", header)
 brand.Size = UDim2.new(1, -110, 0, 22)
 brand.TextSize = 18
 
-local identity = textLabel(&quot;Collaborate in real-time.&quot;, 16, header)
+local identity = textLabel("Collaborate in real-time.", 16, header)
 identity.Position = UDim2.fromOffset(0, 24)
 identity.AutomaticSize = Enum.AutomaticSize.None
 identity.TextColor3 = palette.subtle
 identity.Font = Enum.Font.Gotham
 identity.TextSize = 11
 
--- Status Capsule Badge (Top-Right)
-local statusBadge = Instance.new(&quot;Frame&quot;)
+local statusBadge = Instance.new("Frame")
 statusBadge.Size = UDim2.fromOffset(92, 26)
 statusBadge.Position = UDim2.new(1, -92, 0, 6)
 statusBadge.BackgroundColor3 = palette.tabBg
@@ -226,7 +229,7 @@ statusBadge.Parent = header
 corner(statusBadge, 13)
 local badgeStroke = stroke(statusBadge, palette.line, 1)
 
-local dot = Instance.new(&quot;Frame&quot;)
+local dot = Instance.new("Frame")
 dot.Size = UDim2.fromOffset(7, 7)
 dot.Position = UDim2.new(0, 10, 0.5, -3)
 dot.BackgroundColor3 = palette.muted
@@ -234,7 +237,7 @@ dot.BorderSizePixel = 0
 dot.Parent = statusBadge
 corner(dot, 8)
 
-local statusBadgeLabel = Instance.new(&quot;TextLabel&quot;)
+local statusBadgeLabel = Instance.new("TextLabel")
 statusBadgeLabel.Size = UDim2.new(1, -26, 1, 0)
 statusBadgeLabel.Position = UDim2.fromOffset(22, 0)
 statusBadgeLabel.BackgroundTransparency = 1
@@ -242,11 +245,10 @@ statusBadgeLabel.Font = Enum.Font.GothamBold
 statusBadgeLabel.TextSize = 10
 statusBadgeLabel.TextColor3 = palette.muted
 statusBadgeLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusBadgeLabel.Text = &quot;OFFLINE&quot;
+statusBadgeLabel.Text = "OFFLINE"
 statusBadgeLabel.Parent = statusBadge
 
--- 2 Main Tabs: Segmented Control
-local tabsBar = Instance.new(&quot;Frame&quot;)
+local tabsBar = Instance.new("Frame")
 tabsBar.Position = UDim2.fromOffset(16, 68)
 tabsBar.Size = UDim2.new(1, -32, 0, 32)
 tabsBar.BackgroundColor3 = palette.tabBg
@@ -258,130 +260,128 @@ pad(tabsBar, 3, 3)
 
 local tabButtons = {}
 local tabStrokes = {}
-for i, item in ipairs({{&quot;home&quot;, &quot;Together&quot;}, {&quot;settings&quot;, &quot;Settings&quot;}}) do
-    local b = Instance.new(&quot;TextButton&quot;)
-    b.Size = UDim2.new(0.5, -2, 1, 0)
-    b.Position = UDim2.new((i - 1) * 0.5, (i == 1 and 0 or 2), 0, 0)
-    b.Text = item[2]
-    b.Font = Enum.Font.GothamMedium
-    b.TextSize = 12
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = true
-    b.Parent = tabsBar
-    corner(b, 6)
-    local s = stroke(b, palette.cardBorder, 1)
-    s.Enabled = false
-    tabStrokes[item[1]] = s
-    tabButtons[item[1]] = b
-    b.MouseButton1Click:Connect(function() uiTab = item[1] end)
+for i, item in ipairs({{"home", "Together"}, {"settings", "Settings"}}) do
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(0.5, -2, 1, 0)
+	b.Position = UDim2.new((i - 1) * 0.5, (i == 1 and 0 or 2), 0, 0)
+	b.Text = item[2]
+	b.Font = Enum.Font.GothamMedium
+	b.TextSize = 12
+	b.BorderSizePixel = 0
+	b.AutoButtonColor = true
+	b.Parent = tabsBar
+	corner(b, 6)
+	local s = stroke(b, palette.cardBorder, 1)
+	s.Enabled = false
+	tabStrokes[item[1]] = s
+	tabButtons[item[1]] = b
+	b.MouseButton1Click:Connect(function() uiTab = item[1] end)
 end
 
 -- HOME PANEL
-local homePanel = container(body, &quot;Together&quot;)
+local homePanel = container(body, "Together")
 currentParent = homePanel
 
-local nickHeader = textLabel(&quot;YOUR USERNAME (SHARE WITH FRIEND)&quot;, 16, homePanel)
+local nickHeader = textLabel("YOUR USERNAME (SHARE WITH FRIEND)", 16, homePanel)
 nickHeader.Font = Enum.Font.GothamBold
 nickHeader.TextSize = 10
 nickHeader.TextColor3 = palette.subtle
 
-local shareNick = field(&quot;Connecting...&quot;, &quot;&quot;, homePanel)
+local shareNick = field("Connecting...", "", homePanel)
 shareNick.TextEditable = false
 
-local sessionCard = card(homePanel, &quot;Session&quot;)
-local sessionBadge = textLabel(&quot;ACTIVE SESSION&quot;, 14, sessionCard)
+local sessionCard = card(homePanel, "Session")
+local sessionBadge = textLabel("ACTIVE SESSION", 14, sessionCard)
 sessionBadge.Font = Enum.Font.GothamBold
 sessionBadge.TextSize = 9
 sessionBadge.TextColor3 = palette.green
 
 local sessionTitle = title(game.Name, sessionCard)
-local sessionSubtitle = textLabel(&quot;Real-time changes are synchronized across peers.&quot;, 28, sessionCard)
+local sessionSubtitle = textLabel("Real-time changes are synchronized across peers.", 28, sessionCard)
 sessionSubtitle.TextColor3 = palette.muted
 sessionSubtitle.TextSize = 12
 
-local participantsText = textLabel(&quot;Participants will appear once connected.&quot;, 28, sessionCard)
+local participantsText = textLabel("Participants will appear once connected.", 28, sessionCard)
 participantsText.TextColor3 = palette.subtle
 participantsText.TextSize = 12
 
-local connect = makeButton(&quot;Leave Session&quot;, sessionCard, &quot;danger&quot;)
+local connect = makeButton("Leave Session", sessionCard, "danger")
 connect.Visible = false
 
-local inviteCard = card(homePanel, &quot;Invite&quot;)
-local inviteHeader = title(&quot;Invite Peer&quot;, inviteCard)
+local inviteCard = card(homePanel, "Invite")
+local inviteHeader = title("Invite Peer", inviteCard)
 inviteHeader.TextSize = 15
 
-local nick = field(&quot;Friend&apos;s username in plugin&quot;, &quot;&quot;, inviteCard)
-local invite = makeButton(&quot;Send Invitation&quot;, inviteCard, &quot;primary&quot;)
-local inviteStatus = textLabel(&quot;Ask your friend for their username shown in their plugin.&quot;, 28, inviteCard)
+local nick = field("Friend's username in plugin", "", inviteCard)
+local invite = makeButton("Send Invitation", inviteCard, "primary")
+local inviteStatus = textLabel("Ask your friend for their username shown in their plugin.", 28, inviteCard)
 inviteStatus.TextColor3 = palette.subtle
 inviteStatus.TextSize = 11
 
-local incomingCard = card(homePanel, &quot;Incoming&quot;)
-local incomingTitle = title(&quot;Incoming Invitation&quot;, incomingCard)
+local incomingCard = card(homePanel, "Incoming")
+local incomingTitle = title("Incoming Invitation", incomingCard)
 incomingTitle.TextColor3 = palette.accent
 
-local incoming = textLabel(&quot;&quot;, 34, incomingCard)
+local incoming = textLabel("", 34, incomingCard)
 incoming.TextColor3 = palette.text
-local yes = makeButton(&quot;Accept in Empty Place&quot;, incomingCard, &quot;primary&quot;)
-local no = makeButton(&quot;Decline&quot;, incomingCard)
+local yes = makeButton("Accept in Empty Place", incomingCard, "primary")
+local no = makeButton("Decline", incomingCard)
 yes.Visible = false; no.Visible = false
 
-local retry = makeButton(&quot;Reconnect to Session&quot;, homePanel)
+local retry = makeButton("Reconnect to Session", homePanel)
 retry.Visible = false
 
-local accept = makeButton(&quot;Accept Server Version&quot;, homePanel)
+local accept = makeButton("Accept Server Version", homePanel)
 accept.Visible = false
 
 -- SETTINGS PANEL
-local settingsPanel = container(body, &quot;Settings&quot;)
+local settingsPanel = container(body, "Settings")
 currentParent = settingsPanel
-title(&quot;Settings&quot;)
+title("Settings")
 
-local selfNickHeader = textLabel(&quot;YOUR DISPLAY USERNAME&quot;, 16)
+local selfNickHeader = textLabel("YOUR DISPLAY USERNAME", 16)
 selfNickHeader.Font = Enum.Font.GothamBold
 selfNickHeader.TextSize = 10
 selfNickHeader.TextColor3 = palette.subtle
 
-local selfNick = field(&quot;Username&quot;, plugin:GetSetting(&quot;PTInviteName&quot;) or &quot;&quot;)
-local selfNickHint = textLabel(&quot;Roblox Studio username is used automatically.&quot;, 22)
+local selfNick = field("Username", plugin:GetSetting("PTInviteName") or "")
+local selfNickHint = textLabel("Roblox Studio username is used automatically.", 22)
 selfNickHint.Font = Enum.Font.Gotham
 selfNickHint.TextSize = 11
 selfNickHint.TextColor3 = palette.subtle
 
-local addressHeader = textLabel(&quot;HOST SERVER ADDRESS&quot;, 16)
+local addressHeader = textLabel("HOST SERVER ADDRESS", 16)
 addressHeader.Font = Enum.Font.GothamBold
 addressHeader.TextSize = 10
 addressHeader.TextColor3 = palette.subtle
 
-local address = field(&quot;http://...&quot;, savedAddress)
-local addressHint = textLabel(&quot;Both participants must enter the same server address.&quot;, 22)
+local address = field("http://...", savedAddress)
+local addressHint = textLabel("Both participants must enter the same server address.", 22)
 addressHint.Font = Enum.Font.Gotham
 addressHint.TextSize = 11
 addressHint.TextColor3 = palette.subtle
 
-local presenceToggle = makeButton(&quot;Peer Cursors: On&quot;)
-local logout = makeButton(&quot;Reconnect to Server&quot;)
+local presenceToggle = makeButton("Peer Cursors: On")
+local logout = makeButton("Reconnect to Server")
 
--- CREDITS CARD
-local creditsCard = card(settingsPanel, &quot;CreditsCard&quot;)
-local credTitle = title(&quot;PlaceTogether Credits&quot;, creditsCard)
+local creditsCard = card(settingsPanel, "CreditsCard")
+local credTitle = title("PlaceTogether Credits", creditsCard)
 credTitle.TextSize = 14
 
-local credSub = textLabel(&quot;Authors &amp; Contributors&quot;, 14, creditsCard)
+local credSub = textLabel("Authors & Contributors", 14, creditsCard)
 credSub.Font = Enum.Font.Gotham
 credSub.TextSize = 11
 credSub.TextColor3 = palette.subtle
 
-local dev1 = textLabel(&quot;  @simonpiay43&quot;, 22, creditsCard); dev1.TextColor3 = palette.text; dev1.Font = Enum.Font.GothamMedium; dev1.TextSize = 12
-local dev2 = textLabel(&quot;  @MNKPO57&quot;, 22, creditsCard); dev2.TextColor3 = palette.text; dev2.Font = Enum.Font.GothamMedium; dev2.TextSize = 12
+local dev1 = textLabel("  @simonpiay43", 22, creditsCard); dev1.TextColor3 = palette.text; dev1.Font = Enum.Font.GothamMedium; dev1.TextSize = 12
+local dev2 = textLabel("  @MNKPO57", 22, creditsCard); dev2.TextColor3 = palette.text; dev2.Font = Enum.Font.GothamMedium; dev2.TextSize = 12
 
-local testersHeader = textLabel(&quot;TESTERS&quot;, 16, creditsCard)
+local testersHeader = textLabel("TESTERS", 16, creditsCard)
 testersHeader.TextColor3 = palette.subtle; testersHeader.Font = Enum.Font.GothamBold; testersHeader.TextSize = 10
 
-local tester1 = textLabel(&quot;  @Thcjnvh&quot;, 22, creditsCard); tester1.TextColor3 = palette.accent; tester1.Font = Enum.Font.GothamMedium; tester1.TextSize = 12
+local tester1 = textLabel("  @Thcjnvh", 22, creditsCard); tester1.TextColor3 = palette.accent; tester1.Font = Enum.Font.GothamMedium; tester1.TextSize = 12
 
--- FOOTER (Docked Status Capsule)
-local footer = Instance.new(&quot;Frame&quot;)
+local footer = Instance.new("Frame")
 footer.Position = UDim2.new(0, 16, 1, -44)
 footer.Size = UDim2.new(1, -32, 0, 36)
 footer.BackgroundColor3 = palette.tabBg
@@ -391,7 +391,7 @@ corner(footer, 8)
 stroke(footer, palette.line, 1)
 pad(footer, 12, 0)
 
-local notice = textLabel(&quot;Connecting to server...&quot;, 36, footer)
+local notice = textLabel("Connecting to server...", 36, footer)
 notice.Size = UDim2.fromScale(1, 1)
 notice.AutomaticSize = Enum.AutomaticSize.None
 notice.TextSize = 11
@@ -400,74 +400,77 @@ notice.TextColor3 = palette.muted
 notice.TextTruncate = Enum.TextTruncate.AtEnd
 notice.TextYAlignment = Enum.TextYAlignment.Center
 
-local room = Instance.new(&quot;TextBox&quot;); room.Text = &quot;&quot;
-local token = Instance.new(&quot;TextBox&quot;); token.Text = plugin:GetSetting(&quot;PTInviteToken:&quot;..address.Text) or &quot;&quot;
-local setup = Instance.new(&quot;TextBox&quot;); setup.Text = &quot;&quot;
+local room = Instance.new("TextBox"); room.Text = ""
+local token = Instance.new("TextBox"); token.Text = plugin:GetSetting("PTInviteToken:"..address.Text) or ""
+local setup = Instance.new("TextBox"); setup.Text = ""
 
 local function setNotice(message)
-    local nl = message:find(string.char(10), 1, true)
-    local line = nl and message:sub(1, nl - 1) or message
-    if line:sub(-1) == string.char(13) then line = line:sub(1, -2) end
-    notice.Text = line
+	local nl = message:find(string.char(10), 1, true)
+	local line = nl and message:sub(1, nl - 1) or message
+	if line:sub(-1) == string.char(13) then line = line:sub(1, -2) end
+	notice.Text = line
 end
 
 local function refreshUI(isActive, isLoggedIn, hasInbox, isBusy)
-    homePanel.Visible = uiTab == &quot;home&quot;
-    settingsPanel.Visible = uiTab == &quot;settings&quot;
-    if shareNick.Text ~= selfNick.Text then shareNick.Text = selfNick.Text end
-    identity.Text = isLoggedIn and (selfNick.Text..(isActive and &quot; · In Session&quot; or &quot; · Ready&quot;)) or &quot;Connecting to server...&quot;
-    
-    if isActive then
-        dot.BackgroundColor3 = palette.green
-        statusBadgeLabel.Text = &quot;LIVE&quot;
-        statusBadgeLabel.TextColor3 = palette.green
-        badgeStroke.Color = palette.green
-    elseif isLoggedIn then
-        dot.BackgroundColor3 = palette.accent
-        statusBadgeLabel.Text = &quot;READY&quot;
-        statusBadgeLabel.TextColor3 = palette.accent
-        badgeStroke.Color = palette.line
-    else
-        dot.BackgroundColor3 = palette.muted
-        statusBadgeLabel.Text = &quot;OFFLINE&quot;
-        statusBadgeLabel.TextColor3 = palette.muted
-        badgeStroke.Color = palette.line
-    end
+	homePanel.Visible = uiTab == "home"
+	settingsPanel.Visible = uiTab == "settings"
+	if shareNick.Text ~= selfNick.Text then shareNick.Text = selfNick.Text end
+	identity.Text = isLoggedIn and (selfNick.Text..(isActive and " · In Session" or " · Ready")) or "Connecting to server..."
 
-    sessionCard.Visible = isActive
-    connect.Visible = isActive
-    incomingCard.Visible = hasInbox
-    retry.Visible = isLoggedIn and not isActive and room.Text ~= &quot;&quot;
-    
-    for key, b in pairs(tabButtons) do
-        local isSelected = uiTab == key
-        b.BackgroundColor3 = isSelected and palette.tabActive or palette.tabBg
-        b.TextColor3 = isSelected and palette.text or palette.muted
-        b.Font = isSelected and Enum.Font.GothamBold or Enum.Font.GothamMedium
-        if tabStrokes[key] then
-            tabStrokes[key].Enabled = isSelected
-            tabStrokes[key].Color = isSelected and palette.cardBorder or palette.line
-        end
-    end
-    for _, b in ipairs({invite, yes, no, connect, retry, accept, logout}) do
-        b.Active = not isBusy
-        b.AutoButtonColor = not isBusy
-        b.TextTransparency = isBusy and .45 or 0
-    end
+	if isActive then
+		dot.BackgroundColor3 = palette.green
+		statusBadgeLabel.Text = "LIVE"
+		statusBadgeLabel.TextColor3 = palette.green
+		badgeStroke.Color = palette.green
+	elseif isLoggedIn then
+		dot.BackgroundColor3 = palette.accent
+		statusBadgeLabel.Text = "READY"
+		statusBadgeLabel.TextColor3 = palette.accent
+		badgeStroke.Color = palette.line
+	else
+		dot.BackgroundColor3 = palette.muted
+		statusBadgeLabel.Text = "OFFLINE"
+		statusBadgeLabel.TextColor3 = palette.muted
+		badgeStroke.Color = palette.line
+	end
+
+	sessionCard.Visible = isActive
+	connect.Visible = isActive
+	incomingCard.Visible = hasInbox
+	retry.Visible = isLoggedIn and not isActive and room.Text ~= ""
+
+	for key, b in pairs(tabButtons) do
+		local isSelected = uiTab == key
+		b.BackgroundColor3 = isSelected and palette.tabActive or palette.tabBg
+		b.TextColor3 = isSelected and palette.text or palette.muted
+		b.Font = isSelected and Enum.Font.GothamBold or Enum.Font.GothamMedium
+		if tabStrokes[key] then
+			tabStrokes[key].Enabled = isSelected
+			tabStrokes[key].Color = isSelected and palette.cardBorder or palette.line
+		end
+	end
+	for _, b in ipairs({invite, yes, no, connect, retry, accept, logout}) do
+		b.Active = not isBusy
+		b.AutoButtonColor = not isBusy
+		b.TextTransparency = isBusy and .45 or 0
+	end
 end
 
 button.Click:Connect(function() widget.Enabled = not widget.Enabled end)
 refreshUI(false, false, false, false)
--- CORE SYNC ENGINE (250ms simultaneous sync + auto-terrain + toolbox fast-load)
+
+-- CORE SYNC ENGINE
 local active = false
 local busy = false
 local restoreSuppressed = false
 local objects, ids, baseline, versions = {}, {}, {}, {}
 local dirtyTerrainChunks = {}
 local endpoint, credential
-local Reflection = game:GetService(&quot;ReflectionService&quot;)
-local Assets = game:GetService(&quot;AssetService&quot;)
-local Collection = game:GetService(&quot;CollectionService&quot;)
+local currentRevision = 0
+
+local Reflection = game:GetService("ReflectionService")
+local Assets = game:GetService("AssetService")
+local Collection = game:GetService("CollectionService")
 local propertyCache = {}
 local pending = {}
 local meshRetry = {}
@@ -478,525 +481,597 @@ local warnings = {}
 local function status(s) setNotice(s) end
 local function warn(key, message) warnings[key] = message end
 local function warningText()
-    local count = 0; local sample = {}
-    for _, message in pairs(warnings) do count += 1; if #sample &lt; 2 then table.insert(sample, message) end end
-    return count &gt; 0 and (string.char(10)..&quot;Limitations (&quot;..count..&quot;): &quot;..table.concat(sample, &quot;; &quot;)) or &quot;&quot;
+	local count = 0; local sample = {}
+	for _, message in pairs(warnings) do count += 1; if #sample < 2 then table.insert(sample, message) end end
+	return count > 0 and (string.char(10).."Limitations ("..count.."): "..table.concat(sample, "; ")) or ""
 end
 
 local function equal(a, b)
-    if type(a) ~= type(b) then return false end
-    if type(a) ~= &quot;table&quot; then return a == b end
-    for k, v in pairs(a) do if not equal(v, b[k]) then return false end end
-    for k in pairs(b) do if a[k] == nil then return false end end
-    return true
+	if type(a) ~= type(b) then return false end
+	if type(a) == "number" then
+		if a ~= a or b ~= b then return a == b end
+		return math.abs(a - b) < 0.005
+	end
+	if type(a) ~= "table" then return a == b end
+	for k, v in pairs(a) do if not equal(v, b[k]) then return false end end
+	for k in pairs(b) do if a[k] == nil then return false end end
+	return true
 end
 
 local function copy(value)
-    if type(value) ~= &quot;table&quot; then return value end
-    local result = {}; for key, item in pairs(value) do result[key] = copy(item) end; return result
+	if type(value) ~= "table" then return value end
+	local result = {}; for key, item in pairs(value) do result[key] = copy(item) end; return result
 end
 
 local function merge(base, localValue, remote)
-    if equal(localValue, base) then return copy(remote) end
-    if equal(remote, base) or equal(localValue, remote) then return copy(localValue) end
-    if type(localValue) ~= &quot;table&quot; or type(remote) ~= &quot;table&quot; or localValue.t or remote.t then return copy(localValue) end
-    if localValue.class == nil and localValue.props == nil and #localValue &gt; 0 then return copy(localValue) end
-    local result = {}; local keys = {}
-    for key in pairs(localValue) do keys[key] = true end; for key in pairs(remote) do keys[key] = true end
-    if type(base) == &quot;table&quot; then for key in pairs(base) do keys[key] = true end end
-    for key in pairs(keys) do
-        local previous; if type(base) == &quot;table&quot; then previous = base[key] end
-        result[key] = merge(previous, localValue[key], remote[key])
-    end
-    return result
+	if equal(localValue, base) then return copy(remote) end
+	if equal(remote, base) or equal(localValue, remote) then return copy(localValue) end
+	if type(localValue) ~= "table" or type(remote) ~= "table" or localValue.t or remote.t then return copy(localValue) end
+	if localValue.class == nil and localValue.props == nil and #localValue > 0 then return copy(localValue) end
+	local result = {}; local keys = {}
+	for key in pairs(localValue) do keys[key] = true end; for key in pairs(remote) do keys[key] = true end
+	if type(base) == "table" then for key in pairs(base) do keys[key] = true end end
+	for key in pairs(keys) do
+		local previous; if type(base) == "table" then previous = base[key] end
+		result[key] = merge(previous, localValue[key], remote[key])
+	end
+	return result
 end
 
 local function acknowledged(remote, desired, actual)
-    if equal(remote, desired) then return copy(actual) end
-    if type(remote) ~= &quot;table&quot; or type(desired) ~= &quot;table&quot; or type(actual) ~= &quot;table&quot; then return copy(remote) end
-    local result = {}; local keys = {}
-    for key in pairs(remote) do keys[key] = true end
-    for key in pairs(desired) do keys[key] = true end
-    for key in pairs(actual) do keys[key] = true end
-    for key in pairs(keys) do result[key] = acknowledged(remote[key], desired[key], actual[key]) end
-    return result
+	if equal(remote, desired) then return copy(actual) end
+	if type(remote) ~= "table" or type(desired) ~= "table" or type(actual) ~= "table" then return copy(remote) end
+	local result = {}; local keys = {}
+	for key in pairs(remote) do keys[key] = true end
+	for key in pairs(desired) do keys[key] = true end
+	for key in pairs(actual) do keys[key] = true end
+	for key in pairs(keys) do result[key] = acknowledged(remote[key], desired[key], actual[key]) end
+	return result
 end
 
--- Seamless Sparse Terrain Chunks (64-stud chunks)
 local terrainCache, terrainKnown = {}, {}
 local terrainReadAt = 0
 local terrainForce = true
 local CHUNK, VOXELS = 64, 16
 
-local function terrainKey(x, y, z) return &quot;~Terrain/&quot;..x..&quot;/&quot;..y..&quot;/&quot;..z end
+local function terrainKey(x, y, z) return "~Terrain/"..x.."/"..y.."/"..z end
 local function terrainRegion(origin)
-    return Region3.new(Vector3.new(table.unpack(origin)), Vector3.new(origin[1] + CHUNK, origin[2] + CHUNK, origin[3] + CHUNK))
+	return Region3.new(Vector3.new(table.unpack(origin)), Vector3.new(origin[1] + CHUNK, origin[2] + CHUNK, origin[3] + CHUNK))
 end
 
 local function readTerrain(origin)
-    local channels = workspace.Terrain:ReadVoxelChannels(terrainRegion(origin), 4, {&quot;SolidMaterial&quot;, &quot;SolidOccupancy&quot;, &quot;LiquidOccupancy&quot;})
-    local runs = {}; local previous; local nonempty = false
-    for x = 1, VOXELS do for y = 1, VOXELS do for z = 1, VOXELS do
-        local material = channels.SolidMaterial[x][y][z].Name
-        local solid, liquid = channels.SolidOccupancy[x][y][z], channels.LiquidOccupancy[x][y][z]
-        if solid &gt; 0 or liquid &gt; 0 then nonempty = true end
-        if previous and previous[1] == material and previous[2] == solid and previous[3] == liquid then
-            previous[4] += 1
-        else
-            previous = {material, solid, liquid, 1}
-            table.insert(runs, previous)
-        end
-    end end end
-    if not nonempty then return nil end
-    return {class = &quot;PTTerrainChunk&quot;, name = &quot;Terrain chunk&quot;, parent = &quot;@Workspace&quot;, props = {origin = origin, runs = runs}}
+	local channels = workspace.Terrain:ReadVoxelChannels(terrainRegion(origin), 4, {"SolidMaterial", "SolidOccupancy", "LiquidOccupancy"})
+	local runs = {}; local previous; local nonempty = false
+	for x = 1, VOXELS do for y = 1, VOXELS do for z = 1, VOXELS do
+				local material = channels.SolidMaterial[x][y][z].Name
+				local solid, liquid = channels.SolidOccupancy[x][y][z], channels.LiquidOccupancy[x][y][z]
+				if solid > 0 or liquid > 0 then nonempty = true end
+				if previous and previous[1] == material and previous[2] == solid and previous[3] == liquid then
+					previous[4] += 1
+				else
+					previous = {material, solid, liquid, 1}
+					table.insert(runs, previous)
+				end
+			end end end
+	if not nonempty then return nil end
+	return {class = "PTTerrainChunk", name = "Terrain chunk", parent = "@Workspace", props = {origin = origin, runs = runs}}
 end
 
 local function writeTerrain(origin, runs)
-    local channels = {SolidMaterial = {}, SolidOccupancy = {}, LiquidOccupancy = {}}
-    local runIndex, remaining = 1, runs[1] and runs[1][4] or 0
-    local written = 0
-    for x = 1, VOXELS do
-        for _, array in pairs(channels) do array[x] = {} end
-        for y = 1, VOXELS do
-            for _, array in pairs(channels) do array[x][y] = {} end
-            for z = 1, VOXELS do
-                while remaining == 0 and runIndex &lt; #runs do runIndex += 1; remaining = runs[runIndex][4] end
-                local run = runs[runIndex]; if not run or remaining &lt; 1 then error(&quot;Corrupted Terrain packet&quot;) end
-                local material = Enum.Material[run[1]]; if not material then error(&quot;Unknown Terrain material&quot;) end
-                channels.SolidMaterial[x][y][z] = material; channels.SolidOccupancy[x][y][z] = run[2]; channels.LiquidOccupancy[x][y][z] = run[3]
-                remaining -= 1; written += 1
-            end
-        end
-    end
-    if written ~= 4096 or runIndex ~= #runs or remaining ~= 0 then error(&quot;Invalid Terrain packet size&quot;) end
-    workspace.Terrain:WriteVoxelChannels(terrainRegion(origin), 4, channels)
+	local channels = {SolidMaterial = {}, SolidOccupancy = {}, LiquidOccupancy = {}}
+	local runIndex, remaining = 1, runs[1] and runs[1][4] or 0
+	local written = 0
+	for x = 1, VOXELS do
+		for _, array in pairs(channels) do array[x] = {} end
+		for y = 1, VOXELS do
+			for _, array in pairs(channels) do array[x][y] = {} end
+			for z = 1, VOXELS do
+				while remaining == 0 and runIndex < #runs do runIndex += 1; remaining = runs[runIndex][4] end
+				local run = runs[runIndex]; if not run or remaining < 1 then error("Corrupted Terrain packet") end
+				local material = Enum.Material[run[1]]; if not material then error("Unknown Terrain material") end
+				channels.SolidMaterial[x][y][z] = material; channels.SolidOccupancy[x][y][z] = run[2]; channels.LiquidOccupancy[x][y][z] = run[3]
+				remaining -= 1; written += 1
+			end
+		end
+	end
+	if written ~= 4096 or runIndex ~= #runs or remaining ~= 0 then error("Invalid Terrain packet size") end
+	workspace.Terrain:WriteVoxelChannels(terrainRegion(origin), 4, channels)
 end
 
 local function terrainReset() terrainCache = {}; terrainKnown = {}; terrainReadAt = 0; terrainForce = true end
 
 pcall(function()
-    workspace.Terrain.TerrainModified:Connect(function(region)
-        pcall(function()
-            local minV = region.Min; local maxV = region.Max
-            local x0 = math.floor((minV.X * 4) / CHUNK) * CHUNK; local x1 = math.floor((maxV.X * 4) / CHUNK) * CHUNK
-            local y0 = math.floor((minV.Y * 4) / CHUNK) * CHUNK; local y1 = math.floor((maxV.Y * 4) / CHUNK) * CHUNK
-            local z0 = math.floor((minV.Z * 4) / CHUNK) * CHUNK; local z1 = math.floor((maxV.Z * 4) / CHUNK) * CHUNK
-            for x = x0, x1, CHUNK do for y = y0, y1, CHUNK do for z = z0, z1, CHUNK do
-                dirtyTerrainChunks[terrainKey(x, y, z)] = {x, y, z}
-            end end end
-        end)
-    end)
-    workspace.Terrain.Changed:Connect(function() terrainForce = true end)
+	workspace.Terrain.TerrainModified:Connect(function(region)
+		pcall(function()
+			local minV = region.Min; local maxV = region.Max
+			local x0 = math.floor((minV.X * 4) / CHUNK) * CHUNK; local x1 = math.floor((maxV.X * 4) / CHUNK) * CHUNK
+			local y0 = math.floor((minV.Y * 4) / CHUNK) * CHUNK; local y1 = math.floor((maxV.Y * 4) / CHUNK) * CHUNK
+			local z0 = math.floor((minV.Z * 4) / CHUNK) * CHUNK; local z1 = math.floor((maxV.Z * 4) / CHUNK) * CHUNK
+			for x = x0, x1, CHUNK do for y = y0, y1, CHUNK do for z = z0, z1, CHUNK do
+						dirtyTerrainChunks[terrainKey(x, y, z)] = {x, y, z}
+					end end end
+		end)
+	end)
+	workspace.Terrain.Changed:Connect(function() terrainForce = true end)
 end)
 
 local function terrainRecords()
-    if next(dirtyTerrainChunks) then
-        for key, origin in pairs(dirtyTerrainChunks) do
-            local value = readTerrain(origin); terrainCache[key] = value
-            if value or terrainKnown[key] then terrainKnown[key] = origin end
-            dirtyTerrainChunks[key] = nil
-        end
-        return terrainCache
-    end
-    if not terrainForce and os.clock() - terrainReadAt &lt; 1.5 then return terrainCache end
-    terrainForce = false; terrainReadAt = os.clock()
-    local scan = {}; for key, origin in pairs(terrainKnown) do scan[key] = origin end
-    for key, origin in pairs(scan) do
-        local value = readTerrain(origin); terrainCache[key] = value; if value or terrainKnown[key] then terrainKnown[key] = origin end
-    end
-    return terrainCache
+	-- ИСПРАВЛЕНИЕ: Резервное сканирование ландшафта (если TerrainModified не срабатывает)
+	pcall(function()
+		local cam = workspace.CurrentCamera
+		if cam and cam.Focus then
+			local p = cam.Focus.Position
+			local cx, cy, cz = math.floor(p.X / CHUNK)*CHUNK, math.floor(p.Y / CHUNK)*CHUNK, math.floor(p.Z / CHUNK)*CHUNK
+			local radius = CHUNK * 2
+			for x = cx - radius, cx + radius, CHUNK do
+				for y = cy - radius, cy + radius, CHUNK do
+					for z = cz - radius, cz + radius, CHUNK do
+						local key = terrainKey(x, y, z)
+						-- Добавляем в сканирование неизвестные куски или если есть форсированное обновление
+						if not terrainKnown[key] or terrainForce then
+							dirtyTerrainChunks[key] = {x, y, z}
+						end
+					end
+				end
+			end
+		end
+	end)
+
+	if next(dirtyTerrainChunks) then
+		for key, origin in pairs(dirtyTerrainChunks) do
+			local value = readTerrain(origin); terrainCache[key] = value
+			if value or terrainKnown[key] then terrainKnown[key] = origin end
+			dirtyTerrainChunks[key] = nil
+		end
+		return terrainCache
+	end
+	if not terrainForce and os.clock() - terrainReadAt < 1.5 then return terrainCache end
+	terrainForce = false; terrainReadAt = os.clock()
+	local scan = {}; for key, origin in pairs(terrainKnown) do scan[key] = origin end
+	for key, origin in pairs(scan) do
+		local value = readTerrain(origin); terrainCache[key] = value; if value or terrainKnown[key] then terrainKnown[key] = origin end
+	end
+	return terrainCache
 end
 
 local function applyTerrain(key, value)
-    local origin = value and value.props.origin or terrainKnown[key]
-    if not origin then return end
-    local ok, err = pcall(function()
-        if #origin ~= 3 then error(&quot;Invalid Terrain position&quot;) end
-        writeTerrain(origin, value and value.props.runs or {{&quot;Air&quot;, 0, 0, 4096}})
-    end)
-    if ok then terrainKnown[key] = origin; terrainCache[key] = copy(value); warnings[key..&quot;:terrain&quot;] = nil
-    else warn(key..&quot;:terrain&quot;, &quot;Terrain: &quot;..tostring(err)) end
+	local origin = value and value.props.origin or terrainKnown[key]
+	if not origin then return end
+	local ok, err = pcall(function()
+		if #origin ~= 3 then error("Invalid Terrain position") end
+		writeTerrain(origin, value and value.props.runs or {{"Air", 0, 0, 4096}})
+	end)
+	if ok then terrainKnown[key] = origin; terrainCache[key] = copy(value); warnings[key..":terrain"] = nil
+	else warn(key..":terrain", "Terrain: "..tostring(err)) end
 end
 
 local function encode(v)
-    local t = typeof(v)
-    if t == &quot;nil&quot; then return {t = &quot;Nil&quot;} end
-    if t == &quot;string&quot; or t == &quot;boolean&quot; then return v end
-    if t == &quot;number&quot; then if v == v and math.abs(v) &lt; math.huge then return v end; return nil end
-    if t == &quot;Vector3&quot; or t == &quot;Vector3int16&quot; then return {t = t, v = {v.X, v.Y, v.Z}} end
-    if t == &quot;Vector2&quot; or t == &quot;Vector2int16&quot; then return {t = t, v = {v.X, v.Y}} end
-    if t == &quot;Color3&quot; then return {t = t, v = {v.R, v.G, v.B}} end
-    if t == &quot;CFrame&quot; then return {t = t, v = {v:GetComponents()}} end
-    if t == &quot;UDim2&quot; then return {t = t, v = {v.X.Scale, v.X.Offset, v.Y.Scale, v.Y.Offset}} end
-    if t == &quot;UDim&quot; then return {t = t, v = {v.Scale, v.Offset}} end
-    if t == &quot;BrickColor&quot; then return {t = t, v = v.Number} end
-    if t == &quot;NumberRange&quot; then return {t = t, v = {v.Min, v.Max}} end
-    if t == &quot;Rect&quot; then return {t = t, v = {v.Min.X, v.Min.Y, v.Max.X, v.Max.Y}} end
-    if t == &quot;NumberSequence&quot; then local a = {}; for _, k in ipairs(v.Keypoints) do table.insert(a, {k.Time, k.Value, k.Envelope}) end; return {t = t, v = a} end
-    if t == &quot;ColorSequence&quot; then local a = {}; for _, k in ipairs(v.Keypoints) do table.insert(a, {k.Time, k.Value.R, k.Value.G, k.Value.B}) end; return {t = t, v = a} end
-    if t == &quot;PhysicalProperties&quot; then return {t = t, v = {v.Density, v.Friction, v.Elasticity, v.FrictionWeight, v.ElasticityWeight}} end
-    if t == &quot;Font&quot; then return {t = t, v = {v.Family, v.Weight.Name, v.Style.Name}} end
-    if t == &quot;Ray&quot; then return {t = t, o = encode(v.Origin), d = encode(v.Direction)} end
-    if t == &quot;Axes&quot; then return {t = t, v = {v.X, v.Y, v.Z}} end
-    if t == &quot;Faces&quot; then return {t = t, v = {v.Top, v.Bottom, v.Left, v.Right, v.Front, v.Back}} end
-    if t == &quot;EnumItem&quot; then return {t = t, e = tostring(v.EnumType):gsub(&quot;^Enum%.&quot;, &quot;&quot;), v = v.Name} end
-    if t == &quot;Instance&quot; then
-        if ids[v] then return {t = t, v = ids[v]} end
-        if v.Parent == game then return {t = &quot;Service&quot;, v = v.ClassName} end
-        if v == workspace.Terrain then return {t = &quot;Terrain&quot;} end
-        if v == workspace.CurrentCamera then return {t = &quot;CurrentCamera&quot;} end
-        return nil
-    end
-    if t == &quot;Content&quot; then
-        if v.SourceType == Enum.ContentSourceType.None then return {t = t, v = &quot;&quot;} end
-        if v.SourceType == Enum.ContentSourceType.Uri then return {t = t, v = v.Uri} end
-        return nil
-    end
-    return nil
+	local t = typeof(v)
+	if t == "nil" then return {t = "Nil"} end
+	if t == "string" or t == "boolean" then return v end
+	if t == "number" then if v == v and math.abs(v) < math.huge then return v end; return nil end
+	if t == "Vector3" or t == "Vector3int16" then return {t = t, v = {v.X, v.Y, v.Z}} end
+	if t == "Vector2" or t == "Vector2int16" then return {t = t, v = {v.X, v.Y}} end
+	if t == "Color3" then return {t = t, v = {v.R, v.G, v.B}} end
+	if t == "CFrame" then return {t = t, v = {v:GetComponents()}} end
+	if t == "UDim2" then return {t = t, v = {v.X.Scale, v.X.Offset, v.Y.Scale, v.Y.Offset}} end
+	if t == "UDim" then return {t = t, v = {v.Scale, v.Offset}} end
+	if t == "BrickColor" then return {t = t, v = v.Number} end
+	if t == "NumberRange" then return {t = t, v = {v.Min, v.Max}} end
+	if t == "Rect" then return {t = t, v = {v.Min.X, v.Min.Y, v.Max.X, v.Max.Y}} end
+	if t == "NumberSequence" then local a = {}; for _, k in ipairs(v.Keypoints) do table.insert(a, {k.Time, k.Value, k.Envelope}) end; return {t = t, v = a} end
+	if t == "ColorSequence" then local a = {}; for _, k in ipairs(v.Keypoints) do table.insert(a, {k.Time, k.Value.R, k.Value.G, k.Value.B}) end; return {t = t, v = a} end
+	if t == "PhysicalProperties" then return {t = t, v = {v.Density, v.Friction, v.Elasticity, v.FrictionWeight, v.ElasticityWeight}} end
+	if t == "Font" then return {t = t, v = {v.Family, v.Weight.Name, v.Style.Name}} end
+	if t == "Ray" then return {t = t, o = encode(v.Origin), d = encode(v.Direction)} end
+	if t == "Axes" then return {t = t, v = {v.X, v.Y, v.Z}} end
+	if t == "Faces" then return {t = t, v = {v.Top, v.Bottom, v.Left, v.Right, v.Front, v.Back}} end
+	if t == "EnumItem" then return {t = t, e = tostring(v.EnumType):gsub("^Enum%.", ""), v = v.Name} end
+	if t == "Instance" then
+		if ids[v] then return {t = t, v = ids[v]} end
+		if v.Parent == game then return {t = "Service", v = v.ClassName} end
+		if v == workspace.Terrain then return {t = "Terrain"} end
+		if v == workspace.CurrentCamera then return {t = "CurrentCamera"} end
+		return nil
+	end
+	if t == "Content" then
+		if v.SourceType == Enum.ContentSourceType.None then return {t = t, v = ""} end
+		if v.SourceType == Enum.ContentSourceType.Uri then return {t = t, v = v.Uri} end
+		return nil
+	end
+	return nil
 end
 
 local function decode(v)
-    if type(v) ~= &quot;table&quot; then return v end
-    local t = v.t
-    if t == &quot;Nil&quot; then return nil end
-    if t == &quot;Vector3&quot; then return Vector3.new(table.unpack(v.v)) end
-    if t == &quot;Vector3int16&quot; then return Vector3int16.new(table.unpack(v.v)) end
-    if t == &quot;Vector2&quot; then return Vector2.new(table.unpack(v.v)) end
-    if t == &quot;Vector2int16&quot; then return Vector2int16.new(table.unpack(v.v)) end
-    if t == &quot;Color3&quot; then return Color3.new(table.unpack(v.v)) end
-    if t == &quot;CFrame&quot; then return CFrame.new(table.unpack(v.v)) end
-    if t == &quot;UDim2&quot; then return UDim2.new(table.unpack(v.v)) end
-    if t == &quot;UDim&quot; then return UDim.new(table.unpack(v.v)) end
-    if t == &quot;BrickColor&quot; then return BrickColor.new(v.v) end
-    if t == &quot;NumberRange&quot; then return NumberRange.new(table.unpack(v.v)) end
-    if t == &quot;Rect&quot; then return Rect.new(table.unpack(v.v)) end
-    if t == &quot;NumberSequence&quot; then local a = {}; for _, k in ipairs(v.v) do table.insert(a, NumberSequenceKeypoint.new(table.unpack(k))) end; return NumberSequence.new(a) end
-    if t == &quot;ColorSequence&quot; then local a = {}; for _, k in ipairs(v.v) do table.insert(a, ColorSequenceKeypoint.new(k[1], Color3.new(k[2], k[3], k[4]))) end; return ColorSequence.new(a) end
-    if t == &quot;PhysicalProperties&quot; then return PhysicalProperties.new(table.unpack(v.v)) end
-    if t == &quot;Font&quot; then return Font.new(v.v[1], Enum.FontWeight[v.v[2]], Enum.FontStyle[v.v[3]]) end
-    if t == &quot;Ray&quot; then return Ray.new(decode(v.o), decode(v.d)) end
-    if t == &quot;Axes&quot; then local a = {}; for i, b in ipairs(v.v) do if b then table.insert(a, ({Enum.Axis.X, Enum.Axis.Y, Enum.Axis.Z})[i]) end end; return Axes.new(table.unpack(a)) end
-    if t == &quot;Faces&quot; then local a = {}; for i, b in ipairs(v.v) do if b then table.insert(a, ({Enum.NormalId.Top, Enum.NormalId.Bottom, Enum.NormalId.Left, Enum.NormalId.Right, Enum.NormalId.Front, Enum.NormalId.Back})[i]) end end; return Faces.new(table.unpack(a)) end
-    if t == &quot;EnumItem&quot; then return Enum[v.e][v.v] end
-    if t == &quot;Instance&quot; then return objects[v.v] end
-    if t == &quot;Service&quot; then return game:GetService(v.v) end
-    if t == &quot;Terrain&quot; then return workspace.Terrain end
-    if t == &quot;CurrentCamera&quot; then return workspace.CurrentCamera end
-    if t == &quot;Content&quot; then return v.v == &quot;&quot; and Content.none or Content.fromUri(v.v) end
-    error(&quot;Unknown type &quot;..tostring(t))
+	if type(v) ~= "table" then return v end
+	local t = v.t
+	if t == "Nil" then return nil end
+	if t == "Vector3" then return Vector3.new(table.unpack(v.v)) end
+	if t == "Vector3int16" then return Vector3int16.new(table.unpack(v.v)) end
+	if t == "Vector2" then return Vector2.new(table.unpack(v.v)) end
+	if t == "Vector2int16" then return Vector2int16.new(table.unpack(v.v)) end
+	if t == "Color3" then return Color3.new(table.unpack(v.v)) end
+	if t == "CFrame" then return CFrame.new(table.unpack(v.v)) end
+	if t == "UDim2" then return UDim2.new(table.unpack(v.v)) end
+	if t == "UDim" then return UDim.new(table.unpack(v.v)) end
+	if t == "BrickColor" then return BrickColor.new(v.v) end
+	if t == "NumberRange" then return NumberRange.new(table.unpack(v.v)) end
+	if t == "Rect" then return Rect.new(table.unpack(v.v)) end
+	if t == "NumberSequence" then local a = {}; for _, k in ipairs(v.v) do table.insert(a, NumberSequenceKeypoint.new(table.unpack(k))) end; return NumberSequence.new(a) end
+	if t == "ColorSequence" then local a = {}; for _, k in ipairs(v.v) do table.insert(a, ColorSequenceKeypoint.new(k[1], Color3.new(k[2], k[3], k[4]))) end; return ColorSequence.new(a) end
+	if t == "PhysicalProperties" then return PhysicalProperties.new(table.unpack(v.v)) end
+	if t == "Font" then return Font.new(v.v[1], Enum.FontWeight[v.v[2]], Enum.FontStyle[v.v[3]]) end
+	if t == "Ray" then return Ray.new(decode(v.o), decode(v.d)) end
+	if t == "Axes" then local a = {}; for i, b in ipairs(v.v) do if b then table.insert(a, ({Enum.Axis.X, Enum.Axis.Y, Enum.Axis.Z})[i]) end end; return Axes.new(table.unpack(a)) end
+	if t == "Faces" then local a = {}; for i, b in ipairs(v.v) do if b then table.insert(a, ({Enum.NormalId.Top, Enum.NormalId.Bottom, Enum.NormalId.Left, Enum.NormalId.Right, Enum.NormalId.Front, Enum.NormalId.Back})[i]) end end; return Faces.new(table.unpack(a)) end
+	if t == "EnumItem" then return Enum[v.e][v.v] end
+	if t == "Instance" then return objects[v.v] end
+	if t == "Service" then return game:GetService(v.v) end
+	if t == "Terrain" then return workspace.Terrain end
+	if t == "CurrentCamera" then return workspace.CurrentCamera end
+	if t == "Content" then return v.v == "" and Content.none or Content.fromUri(v.v) end
+	error("Unknown type "..tostring(t))
 end
 
 local denied = {Name = true, Parent = true, ClassName = true, Source = true, UniqueId = true, HistoryId = true, Capabilities = true, Sandboxed = true, DefinesCapabilities = true, RobloxLocked = true, Tags = true, Attributes = true, AttributesSerialize = true, AttributesReplicate = true}
 local physics = {AssemblyLinearVelocity = true, AssemblyAngularVelocity = true, Velocity = true, RotVelocity = true, ReceiveAge = true}
 local publicEdit = {Size = true, Color = true, Shape = true, MaterialVariant = true, Archivable = true, WorldPivot = true, ImageContent = true, AudioContent = true, MeshContent = true, TextureContent = true, ColorMapContent = true, CameraOffset = true, Health = true, Axis = true, SecondaryAxis = true}
-local appearanceProps = {&quot;Image&quot;, &quot;ImageContent&quot;, &quot;ImageColor3&quot;, &quot;ImageTransparency&quot;, &quot;ImageRectOffset&quot;, &quot;ImageRectSize&quot;, &quot;ScaleType&quot;, &quot;SliceCenter&quot;, &quot;SliceScale&quot;, &quot;TileSize&quot;, &quot;ResampleMode&quot;, &quot;Texture&quot;, &quot;TextureContent&quot;, &quot;TextureID&quot;, &quot;ColorMap&quot;, &quot;ColorMapContent&quot;, &quot;NormalMap&quot;, &quot;NormalMapContent&quot;, &quot;RoughnessMap&quot;, &quot;RoughnessMapContent&quot;, &quot;MetalnessMap&quot;, &quot;MetalnessMapContent&quot;, &quot;EmissiveMaskContent&quot;, &quot;EmissiveStrength&quot;, &quot;EmissiveTint&quot;, &quot;AlphaMode&quot;, &quot;Color&quot;, &quot;Transparency&quot;, &quot;Face&quot;, &quot;StudsPerTileU&quot;, &quot;StudsPerTileV&quot;, &quot;OffsetStudsU&quot;, &quot;OffsetStudsV&quot;}
+local appearanceProps = {"Image", "ImageContent", "ImageColor3", "ImageTransparency", "ImageRectOffset", "ImageRectSize", "ScaleType", "SliceCenter", "SliceScale", "TileSize", "ResampleMode", "Texture", "TextureContent", "TextureID", "ColorMap", "ColorMapContent", "NormalMap", "NormalMapContent", "RoughnessMap", "RoughnessMapContent", "MetalnessMap", "MetalnessMapContent", "EmissiveMaskContent", "EmissiveStrength", "EmissiveTint", "AlphaMode", "Color", "Transparency", "Face", "StudsPerTileU", "StudsPerTileV", "OffsetStudsU", "OffsetStudsV"}
 local appearanceSet = {}; for _, name in ipairs(appearanceProps) do appearanceSet[name] = true end
-local contentAliases = {Image = &quot;ImageContent&quot;, Texture = &quot;TextureContent&quot;, ColorMap = &quot;ColorMapContent&quot;, NormalMap = &quot;NormalMapContent&quot;, RoughnessMap = &quot;RoughnessMapContent&quot;, MetalnessMap = &quot;MetalnessMapContent&quot;}
+local contentAliases = {Image = "ImageContent", Texture = "TextureContent", ColorMap = "ColorMapContent", NormalMap = "NormalMapContent", RoughnessMap = "RoughnessMapContent", MetalnessMap = "MetalnessMapContent"}
 
 local function properties(obj)
-    local class = obj.ClassName
-    if propertyCache[class] then return propertyCache[class] end
-    local list = {}; local seen = {}
-    local function add(name)
-        if not seen[name] and not denied[name] and not physics[name] then
-            local modern = contentAliases[name]
-            if modern then local readable, value = pcall(function() return obj[modern] end); if readable and typeof(value) == &quot;Content&quot; then return end end
-            if obj:IsA(&quot;BasePart&quot;) and (name == &quot;Position&quot; or name == &quot;Orientation&quot; or name == &quot;Rotation&quot; or name == &quot;BrickColor&quot; or name == &quot;CollisionGroupId&quot;) then return end
-            if obj:IsA(&quot;Attachment&quot;) and (name == &quot;Position&quot; or name == &quot;Orientation&quot; or name == &quot;Rotation&quot;) then return end
-            if obj:IsA(&quot;BaseScript&quot;) and name == &quot;Enabled&quot; then return end
-            if name == &quot;MeshContent&quot; or name == &quot;MeshSize&quot; or name == &quot;MeshId&quot; or name == &quot;CollisionFidelity&quot; or name == &quot;RenderFidelity&quot; or name == &quot;FluidFidelity&quot; then if obj:IsA(&quot;MeshPart&quot;) then return end end
-            seen[name] = true; table.insert(list, name)
-        end
-    end
-    local ok, info = pcall(function() return Reflection:GetPropertiesOfClass(class, {ExcludeDisplay = true}) end)
-    if ok and info then for _, p in ipairs(info) do if (p.Serialized or publicEdit[p.Name]) and p.Permits and p.Permits.Write ~= nil then add(p.Name) end end end
-    for _, group in ipairs({common, props}) do for _, name in ipairs(group) do local good = pcall(function() return obj[name] end); if good then add(name) end end end
-    for _, name in ipairs(appearanceProps) do local good = pcall(function() return obj[name] end); if good then add(name) end end
-    propertyCache[class] = list; return list
+	local class = obj.ClassName
+	if propertyCache[class] then return propertyCache[class] end
+	local list = {}; local seen = {}
+	local function add(name)
+		if not seen[name] and not denied[name] and not physics[name] then
+			local modern = contentAliases[name]
+			if modern then local readable, value = pcall(function() return obj[modern] end); if readable and typeof(value) == "Content" then return end end
+			if obj:IsA("BasePart") and (name == "Position" or name == "Orientation" or name == "Rotation" or name == "BrickColor" or name == "CollisionGroupId") then return end
+			if obj:IsA("Attachment") and (name == "Position" or name == "Orientation" or name == "Rotation") then return end
+			if obj:IsA("BaseScript") and name == "Enabled" then return end
+			if name == "MeshContent" or name == "MeshSize" or name == "MeshId" or name == "CollisionFidelity" or name == "RenderFidelity" or name == "FluidFidelity" then if obj:IsA("MeshPart") then return end end
+			seen[name] = true; table.insert(list, name)
+		end
+	end
+	local ok, info = pcall(function() return Reflection:GetPropertiesOfClass(class, {ExcludeDisplay = true}) end)
+	if ok and info then for _, p in ipairs(info) do if (p.Serialized or publicEdit[p.Name]) and p.Permits and p.Permits.Write ~= nil then add(p.Name) end end end
+	for _, group in ipairs({common, props}) do for _, name in ipairs(group) do local good = pcall(function() return obj[name] end); if good then add(name) end end end
+	for _, name in ipairs(appearanceProps) do local good = pcall(function() return obj[name] end); if good then add(name) end end
+	propertyCache[class] = list; return list
 end
 
 local function isToolboxDescendant(obj)
-    local cur = obj.Parent
-    while cur and cur ~= game and cur ~= workspace do
-        if cur:IsA(&quot;Model&quot;) then
-            local tbId = 0
-            pcall(function() if cur.SourceAssetId and cur.SourceAssetId &gt; 0 then tbId = cur.SourceAssetId end end)
-            if tbId == 0 then
-                local attr = cur:GetAttribute(&quot;SourceAssetId&quot;) or cur:GetAttribute(&quot;AssetId&quot;) or cur:GetAttribute(&quot;ToolboxAssetId&quot;)
-                if tonumber(attr) and tonumber(attr) &gt; 0 then tbId = tonumber(attr) end
-            end
-            if tbId &gt; 0 then return true end
-        end
-        cur = cur.Parent
-    end
-    return false
+	local cur = obj.Parent
+	while cur and cur ~= game and cur ~= workspace do
+		if cur:IsA("Model") then
+			local tbId = 0
+			pcall(function() if cur.SourceAssetId and cur.SourceAssetId > 0 then tbId = cur.SourceAssetId end end)
+			if tbId == 0 then
+				local attr = cur:GetAttribute("SourceAssetId") or cur:GetAttribute("AssetId") or cur:GetAttribute("ToolboxAssetId")
+				if tonumber(attr) and tonumber(attr) > 0 then tbId = tonumber(attr) end
+			end
+			if tbId > 0 then return true end
+		end
+		cur = cur.Parent
+	end
+	return false
 end
 
-local function eligible(obj) return obj ~= script and obj ~= workspace.CurrentCamera and not obj:IsA(&quot;Terrain&quot;) and not isToolboxDescendant(obj) end
+local function eligible(obj) return obj ~= script and obj ~= workspace.CurrentCamera and not obj:IsA("Terrain") and not isToolboxDescendant(obj) end
 
 local function index()
-    objects = {}; ids = {}; baseline = {}; versions = {}; pending = {}; meshRetry = {}; referenceRetry = {}; appearanceRetry = {}; warnings = {}
-    terrainReset()
-    local function walk(parent, parentId)
-        local counts = {}
-        for _, obj in ipairs(parent:GetChildren()) do if eligible(obj) then
-            local stem = obj.ClassName..&quot;:&quot;..obj.Name; counts[stem] = (counts[stem] or 0) + 1
-            local key = obj:GetAttribute(&quot;PT_ObjectId&quot;)
-            if type(key) ~= &quot;string&quot; or #key &gt; 512 or objects[key] then
-                key = parentId..&quot;/&quot;..Http:UrlEncode(stem)..&quot;:&quot;..counts[stem]
-                if #key &gt; 480 then key = Http:GenerateGUID(false) end
-                obj:SetAttribute(&quot;PT_ObjectId&quot;, key)
-            end
-            objects[key] = obj; ids[obj] = key; walk(obj, key)
-        end end
-    end
-    for _, name in ipairs(roots) do local svc = game:GetService(name); objects[&quot;@&quot;..name] = svc; ids[svc] = &quot;@&quot;..name; walk(svc, &quot;@&quot;..name) end
-    objects[&quot;@Terrain&quot;] = workspace.Terrain; ids[workspace.Terrain] = &quot;@Terrain&quot;; serviceIds[&quot;@Terrain&quot;] = true
+	currentRevision = 0
+	objects = {}; ids = {}; baseline = {}; versions = {}; pending = {}; meshRetry = {}; referenceRetry = {}; appearanceRetry = {}; warnings = {}
+	terrainReset()
+	local function walk(parent, parentId)
+		local counts = {}
+		for _, obj in ipairs(parent:GetChildren()) do if eligible(obj) then
+				local stem = obj.ClassName..":"..obj.Name; counts[stem] = (counts[stem] or 0) + 1
+				local key = obj:GetAttribute("PT_ObjectId")
+				if type(key) ~= "string" or #key > 512 or objects[key] then
+					key = parentId.."/"..Http:UrlEncode(stem)..":"..counts[stem]
+					if #key > 480 then key = Http:GenerateGUID(false) end
+					obj:SetAttribute("PT_ObjectId", key)
+				end
+				objects[key] = obj; ids[obj] = key; walk(obj, key)
+			end end
+	end
+	for _, name in ipairs(roots) do local svc = game:GetService(name); objects["@"..name] = svc; ids[svc] = "@"..name; walk(svc, "@"..name) end
+	objects["@Terrain"] = workspace.Terrain; ids[workspace.Terrain] = "@Terrain"; serviceIds["@Terrain"] = true
 end
 
 local function discover(parent)
-    for _, obj in ipairs(parent:GetChildren()) do if eligible(obj) then
-        if not ids[obj] then local key = Http:GenerateGUID(false); ids[obj] = key; objects[key] = obj; obj:SetAttribute(&quot;PT_ObjectId&quot;, key) end
-        discover(obj)
-    end end
+	for _, obj in ipairs(parent:GetChildren()) do if eligible(obj) then
+			if not ids[obj] then local key = Http:GenerateGUID(false); ids[obj] = key; objects[key] = obj; obj:SetAttribute("PT_ObjectId", key) end
+			discover(obj)
+		end end
 end
 
 local function capture(obj, key)
-    local p = {}
-    for _, property in ipairs(properties(obj)) do
-        local ok, value = pcall(function() return encode(obj[property]) end)
-        if ok and value ~= nil then p[property] = value end
-        if ok and value == nil and appearanceSet[property] then
-            warn(key..&quot;:content:&quot;..property, obj.Name..&quot;.&quot;..property..&quot;: local EditableImage cannot be sent as URI; image must be published&quot;)
-        else
-            warnings[key..&quot;:content:&quot;..property] = nil
-        end
-    end
-    if obj:IsA(&quot;Model&quot;) and not p.WorldPivot then pcall(function() p.WorldPivot = encode(obj:GetPivot()) end) end
-    if obj:IsA(&quot;LuaSourceContainer&quot;) then
-        local ok, text = pcall(function() return Editor:GetEditorSource(obj) end)
-        if not ok then ok, text = pcall(function() return obj.Source end) end
-        if ok then p.Source = text:gsub(string.char(13, 10), string.char(10)):gsub(string.char(13), string.char(10)); warnings[key..&quot;:Source&quot;] = nil else warn(key..&quot;:Source&quot;, obj.Name..&quot;: cannot access script source&quot;) end
-    end
-    if obj:IsA(&quot;MeshPart&quot;) then for _, name in ipairs({&quot;MeshId&quot;, &quot;MeshContent&quot;, &quot;CollisionFidelity&quot;, &quot;RenderFidelity&quot;, &quot;FluidFidelity&quot;}) do local ok, v = pcall(function() return encode(obj[name]) end); if ok and v then p[name] = v end end end
-    local attrs = {}; for name, value in pairs(obj:GetAttributes()) do if name ~= &quot;PT_ObjectId&quot; then local v = encode(value); if v ~= nil then attrs[name] = v end end end
-    local tags = Collection:GetTags(obj); table.sort(tags)
-    local tbAssetId = 0
-    if obj:IsA(&quot;Model&quot;) then
-        pcall(function() if obj.SourceAssetId and obj.SourceAssetId &gt; 0 then tbAssetId = obj.SourceAssetId end end)
-        if tbAssetId == 0 then
-            local attrId = obj:GetAttribute(&quot;SourceAssetId&quot;) or obj:GetAttribute(&quot;AssetId&quot;) or obj:GetAttribute(&quot;ToolboxAssetId&quot;)
-            if tonumber(attrId) then tbAssetId = tonumber(attrId) end
-        end
-    end
-    return {class = obj.ClassName, name = obj.Name, parent = ids[obj.Parent] or &quot;@game&quot;, props = p, attributes = attrs, tags = tags, modelScale = obj:IsA(&quot;Model&quot;) and obj:GetScale() or nil, isToolbox = (tbAssetId &gt; 0), assetId = tbAssetId}
+	local p = {}
+	for _, property in ipairs(properties(obj)) do
+		local ok, value = pcall(function() return encode(obj[property]) end)
+		if ok and value ~= nil then p[property] = value end
+		if ok and value == nil and appearanceSet[property] then
+			warn(key..":content:"..property, obj.Name.."."..property..": local EditableImage cannot be sent as URI; image must be published")
+		else
+			warnings[key..":content:"..property] = nil
+		end
+	end
+	if obj:IsA("Model") and not p.WorldPivot then pcall(function() p.WorldPivot = encode(obj:GetPivot()) end) end
+	if obj:IsA("LuaSourceContainer") then
+		local ok, text = pcall(function() return Editor:GetEditorSource(obj) end)
+		if not ok then ok, text = pcall(function() return obj.Source end) end
+		if ok then p.Source = text:gsub(string.char(13, 10), string.char(10)):gsub(string.char(13), string.char(10)); warnings[key..":Source"] = nil else warn(key..":Source", obj.Name..": cannot access script source") end
+	end
+	if obj:IsA("MeshPart") then for _, name in ipairs({"MeshId", "MeshContent", "CollisionFidelity", "RenderFidelity", "FluidFidelity"}) do local ok, v = pcall(function() return encode(obj[name]) end); if ok and v then p[name] = v end end end
+	local attrs = {}; for name, value in pairs(obj:GetAttributes()) do if name ~= "PT_ObjectId" then local v = encode(value); if v ~= nil then attrs[name] = v end end end
+	local tags = Collection:GetTags(obj); table.sort(tags)
+	local tbAssetId = 0
+	if obj:IsA("Model") then
+		pcall(function() if obj.SourceAssetId and obj.SourceAssetId > 0 then tbAssetId = obj.SourceAssetId end end)
+		if tbAssetId == 0 then
+			local attrId = obj:GetAttribute("SourceAssetId") or obj:GetAttribute("AssetId") or obj:GetAttribute("ToolboxAssetId")
+			if tonumber(attrId) then tbAssetId = tonumber(attrId) end
+		end
+	end
+	return {class = obj.ClassName, name = obj.Name, parent = ids[obj.Parent] or "@game", props = p, attributes = attrs, tags = tags, modelScale = obj:IsA("Model") and obj:GetScale() or nil, isToolbox = (tbAssetId > 0), assetId = tbAssetId}
 end
 
 local function snapshot()
-    for _, name in ipairs(roots) do discover(game:GetService(name)) end
-    local out = {}
-    for key, obj in pairs(objects) do if obj.Parent and (serviceIds[key] or ids[obj.Parent]) then
-        local ok, value = pcall(capture, obj, key)
-        if ok then out[key] = value else warn(key..&quot;:capture&quot;, obj.Name..&quot;: error reading object&quot;); out[key] = baseline[key] end
-    end end
-    for key, value in pairs(terrainRecords()) do out[key] = value end
-    return out
+	for _, name in ipairs(roots) do discover(game:GetService(name)) end
+	local out = {}
+	for key, obj in pairs(objects) do if obj.Parent and (serviceIds[key] or ids[obj.Parent]) then
+			local ok, value = pcall(capture, obj, key)
+			if ok then out[key] = value else warn(key..":capture", obj.Name..": error reading object"); out[key] = baseline[key] end
+		end end
+	for key, value in pairs(terrainRecords()) do out[key] = value end
+	return out
 end
 
 local function request(method, payload, renewed)
-    local t0 = os.clock()
-    local response = Http:RequestAsync({Url = endpoint, Method = method, Headers = {Authorization = &quot;Bearer &quot;..credential, [&quot;Content-Type&quot;] = &quot;application/json&quot;, [&quot;bypass-tunnel-reminder&quot;] = &quot;true&quot;}, Body = payload and Http:JSONEncode(payload) or nil})
-    if response.StatusCode == 401 and guestEnter and not renewed then guestEnter(); return request(method, payload, true) end
-    local decoded, value = pcall(function() return Http:JSONDecode(response.Body) end)
-    if not decoded then error(&quot;Server returned invalid response (HTTP &quot;..response.StatusCode..&quot;). Retrying...&quot;) end
-    if response.StatusCode == 409 and method == &quot;POST&quot; then value.conflict = true; return value end
-    if not response.Success then error(value.error or (&quot;HTTP &quot;..response.StatusCode)) end
-    return value
+	local t0 = os.clock()
+	local reqUrl = endpoint
+
+	if method == "GET" then
+		reqUrl = reqUrl .. (reqUrl:find("?") and "&" or "?") .. "_t=" .. tostring(os.clock())
+		if currentRevision and currentRevision > 0 then
+			reqUrl = reqUrl .. "&since=" .. tostring(currentRevision)
+		end
+	end
+
+	local response = Http:RequestAsync({Url = reqUrl, Method = method, Headers = {Authorization = "Bearer "..credential, ["Content-Type"] = "application/json", ["bypass-tunnel-reminder"] = "true"}, Body = payload and Http:JSONEncode(payload) or nil})
+
+	if response.StatusCode == 401 and guestEnter and not renewed then guestEnter(); return request(method, payload, true) end
+	local decoded, value = pcall(function() return Http:JSONDecode(response.Body) end)
+	if not decoded then error("Server returned invalid response (HTTP "..response.StatusCode.."). Retrying...") end
+	if response.StatusCode == 409 and method == "POST" then value.conflict = true; return value end
+	if not response.Success then error(value.error or ("HTTP "..response.StatusCode)) end
+	return value
 end
 
 local function meshSource(value)
-    local p = value.props
-    if type(p.MeshId) == &quot;string&quot; and p.MeshId ~= &quot;&quot; then return Content.fromUri(p.MeshId) end
-    if p.MeshContent and p.MeshContent.t == &quot;Content&quot; and p.MeshContent.v ~= &quot;&quot; then return decode(p.MeshContent) end
-    return nil
+	local p = value.props
+	if type(p.MeshId) == "string" and p.MeshId ~= "" then return Content.fromUri(p.MeshId) end
+	if p.MeshContent and p.MeshContent.t == "Content" and p.MeshContent.v ~= "" then return decode(p.MeshContent) end
+	return nil
 end
 
 local function loadMesh(obj, key, value)
-    if not obj:IsA(&quot;MeshPart&quot;) then return end
-    local source = meshSource(value); if not source then return end
-    local p = value.props
-    local ok, current = pcall(function() return obj.MeshId end)
-    if ok and type(p.MeshId) == &quot;string&quot; and current == p.MeshId then return end
-    if meshRetry[key] and meshRetry[key] &gt; os.clock() then return end
-    local success, err = pcall(function()
-        local options = {}; for _, name in ipairs({&quot;CollisionFidelity&quot;, &quot;RenderFidelity&quot;, &quot;FluidFidelity&quot;}) do if p[name] then options[name] = decode(p[name]) end end
-        local fresh = Assets:CreateMeshPartAsync(source, options); if not fresh then error(&quot;Roblox did not return mesh geometry&quot;) end
-        obj:ApplyMesh(fresh); fresh:Destroy()
-    end)
-    if success then meshRetry[key] = nil; warnings[key..&quot;:mesh&quot;] = nil
-    else meshRetry[key] = os.clock() + 15; warn(key..&quot;:mesh&quot;, value.name..&quot;: Roblox refused to load mesh; other parts continue syncing&quot;) end
+	if not obj:IsA("MeshPart") then return end
+	local source = meshSource(value); if not source then return end
+	local p = value.props
+	local ok, current = pcall(function() return obj.MeshId end)
+	if ok and type(p.MeshId) == "string" and current == p.MeshId then return end
+	if meshRetry[key] and meshRetry[key] > os.clock() then return end
+	local success, err = pcall(function()
+		local options = {}; for _, name in ipairs({"CollisionFidelity", "RenderFidelity", "FluidFidelity"}) do if p[name] then options[name] = decode(p[name]) end end
+		local fresh = Assets:CreateMeshPartAsync(source, options); if not fresh then error("Roblox did not return mesh geometry") end
+		obj:ApplyMesh(fresh); fresh:Destroy()
+	end)
+	if success then meshRetry[key] = nil; warnings[key..":mesh"] = nil
+	else meshRetry[key] = os.clock() + 15; warn(key..":mesh", value.name..": Roblox refused to load mesh; other parts continue syncing") end
 end
 
 local function apply(remote, sent, force)
-    local before = snapshot(); local changed = {}
-    for key, record in pairs(remote) do
-        if force or versions[key] ~= record.version or pending[key] or meshRetry[key] or referenceRetry[key] or (appearanceRetry[key] and appearanceRetry[key] &lt;= os.clock()) then
-            changed[key] = {version = record.version, value = force and copy(record.value) or merge(baseline[key], before[key], record.value)}
-        end
-    end
-    for key, r in pairs(changed) do
-        if r.value and r.value.class ~= &quot;PTTerrainChunk&quot; and not objects[key] then
-            if r.value.isToolbox and r.value.assetId and r.value.assetId &gt; 0 then
-                pending[key] = true
-                task.spawn(function()
-                    local ok, asset = pcall(function() return InsertService:LoadAsset(r.value.assetId) end)
-                    if ok and asset then
-                        local model = asset:GetChildren()[1] or asset
-                        model.Name = r.value.name; model:SetAttribute(&quot;PT_ObjectId&quot;, key); objects[key] = model; ids[model] = key
-                        local targetPivot = r.value.props and (r.value.props.WorldPivot or r.value.props.CFrame)
-                        if targetPivot then pcall(function() model:PivotTo(decode(targetPivot)) end) end
-                        if r.value.modelScale then pcall(function() model:ScaleTo(r.value.modelScale) end) end
-                        model.Parent = objects[r.value.parent] or workspace; asset:Destroy()
-                        pending[key] = nil
-                        status(&quot;Toolbox model loaded: &quot;..model.Name)
-                    else
-                        local ok2, obj = pcall(Instance.new, r.value.class)
-                        if ok2 then
-                            if obj:IsA(&quot;BasePart&quot;) then for _, s in ipairs({&quot;TopSurface&quot;, &quot;BottomSurface&quot;, &quot;LeftSurface&quot;, &quot;RightSurface&quot;, &quot;FrontSurface&quot;, &quot;BackSurface&quot;}) do obj[s] = Enum.SurfaceType.Smooth end end
-                            obj:SetAttribute(&quot;PT_ObjectId&quot;, key); objects[key] = obj; ids[obj] = key; pending[key] = nil; warnings[key..&quot;:create&quot;] = nil
-                        end
-                    end
-                end)
-            else
-                local ok, obj = pcall(Instance.new, r.value.class)
-                if ok then
-                    if obj:IsA(&quot;BasePart&quot;) then for _, s in ipairs({&quot;TopSurface&quot;, &quot;BottomSurface&quot;, &quot;LeftSurface&quot;, &quot;RightSurface&quot;, &quot;FrontSurface&quot;, &quot;BackSurface&quot;}) do obj[s] = Enum.SurfaceType.Smooth end end
-                    obj:SetAttribute(&quot;PT_ObjectId&quot;, key); objects[key] = obj; ids[obj] = key; pending[key] = nil; warnings[key..&quot;:create&quot;] = nil
-                else pending[key] = true; warn(key..&quot;:create&quot;, r.value.name..&quot;: class cannot be created via API&quot;) end
-            end
-        end
-    end
-    for key, r in pairs(changed) do local v = r.value; local obj = objects[key]
-        if v and obj then
-            local ok = pcall(function() if obj.Name ~= v.name then obj.Name = v.name end; if not serviceIds[key] then local parent = objects[v.parent]; if not parent then error(&quot;Parent unavailable&quot;) end; if obj.Parent ~= parent then obj.Parent = parent end end end)
-            if ok then pending[key] = nil; warnings[key..&quot;:parent&quot;] = nil else pending[key] = true; warn(key..&quot;:parent&quot;, v.name..&quot;: waiting for parent object&quot;) end
-        end
-    end
-    local models = {}
-    for key, r in pairs(changed) do local obj = objects[key]; if r.value and obj and obj:IsA(&quot;Model&quot;) and r.value.modelScale then table.insert(models, {key = key, record = r, obj = obj}) end end
-    local function depth(obj) local n = 0; while obj.Parent do n += 1; obj = obj.Parent end; return n end
-    table.sort(models, function(a, b) return depth(a.obj) &lt; depth(b.obj) end)
-    for _, item in ipairs(models) do
-        local value = item.record.value.modelScale
-        if type(value) == &quot;number&quot; and value &gt; 0 and math.abs(item.obj:GetScale() - value) &gt; 1e-6 then
-            local safe = true
-            if not force then for _, child in ipairs(item.obj:GetDescendants()) do local key = ids[child]; if key and not equal(before[key], sent[key]) then safe = false; break end end end
-            if safe then local ok = pcall(function() item.obj:ScaleTo(value) end); if ok then warnings[item.key..&quot;:scale&quot;] = nil else warn(item.key..&quot;:scale&quot;, item.obj.Name..&quot;: model scale unavailable&quot;) end end
-        end
-    end
-    for key, r in pairs(changed) do local v = r.value; local obj = objects[key]
-        if not v then appearanceRetry[key] = nil end
-        if v and obj and not pending[key] then
-            referenceRetry[key] = nil
-            appearanceRetry[key] = nil
-            loadMesh(obj, key, v)
-            local values = {}
-            for name, value in pairs(v.props) do if not (obj:IsA(&quot;MeshPart&quot;) and (name == &quot;MeshId&quot; or name == &quot;MeshContent&quot; or name == &quot;CollisionFidelity&quot; or name == &quot;RenderFidelity&quot; or name == &quot;FluidFidelity&quot;)) then table.insert(values, {name, value}) end end
-            local function priority(pair)
-                local name, value = pair[1], pair[2]
-                if name == &quot;Shape&quot; then return 0 end
-                if name == &quot;Size&quot; then return 2 end
-                if name == &quot;CFrame&quot; or name == &quot;WorldPivot&quot; then return 3 end
-                if type(value) == &quot;table&quot; and value.t == &quot;Instance&quot; then return 4 end
-                if name == &quot;Source&quot; then return 5 end
-                return 1
-            end
-            table.sort(values, function(a, b) local aa, bb = priority(a), priority(b); if aa == bb then return a[1] &lt; b[1] end; return aa &lt; bb end)
-            for _, pair in ipairs(values) do local name, value = pair[1], pair[2]
-                local ok = pcall(function()
-                    if type(value) == &quot;table&quot; and value.t == &quot;Instance&quot; and not objects[value.v] then referenceRetry[key] = true; error(&quot;Linked instance still loading&quot;) end
-                    if name == &quot;Source&quot; and obj:IsA(&quot;LuaSourceContainer&quot;) then if Editor:GetEditorSource(obj) ~= value then Editor:UpdateSourceAsync(obj, function() return value end) end
-                    elseif obj:IsA(&quot;Model&quot;) and (name == &quot;CFrame&quot; or name == &quot;WorldPivot&quot;) then local cf = decode(value); if typeof(cf) == &quot;CFrame&quot; then obj:PivotTo(cf) end
-                    elseif not equal(encode(obj[name]), value) then obj[name] = decode(value) end
-                end)
-                if ok then warnings[key..&quot;:&quot;..name] = nil else warn(key..&quot;:&quot;..name, v.name..&quot;.&quot;..name..&quot;: unavailable via API&quot;); if appearanceSet[name] then appearanceRetry[key] = os.clock() + 10 end end
-            end
-            if v.attributes then
-                for name in pairs(obj:GetAttributes()) do if name ~= &quot;PT_ObjectId&quot; and v.attributes[name] == nil then local ok = pcall(function() obj:SetAttribute(name, nil) end); if not ok then warn(key..&quot;:attribute:&quot;..name, v.name..&quot;: attribute protected by Roblox&quot;) end end end
-                for name, value in pairs(v.attributes) do local ok = pcall(function() if not equal(encode(obj:GetAttribute(name)), value) then obj:SetAttribute(name, decode(value)) end end); if not ok then warn(key..&quot;:attribute:&quot;..name, v.name..&quot;: failed to apply attribute &quot;..name) end end
-            end
-            if v.tags then local tags = {}; for _, tag in ipairs(v.tags) do tags[tag] = true; if not Collection:HasTag(obj, tag) then Collection:AddTag(obj, tag) end end; for _, tag in ipairs(Collection:GetTags(obj)) do if not tags[tag] then Collection:RemoveTag(obj, tag) end end end
-        elseif not v and obj and not serviceIds[key] then local ok = pcall(function() obj:Destroy() end); if ok then ids[obj] = nil; objects[key] = nil; pending[key] = nil; meshRetry[key] = nil; referenceRetry[key] = nil else warn(key..&quot;:delete&quot;, obj.Name..&quot;: Roblox prevented deletion&quot;) end end
-    end
-    for key, r in pairs(changed) do if key:sub(1, 9) == &quot;~Terrain/&quot; then applyTerrain(key, r.value) end end
-    local after = snapshot()
-    for key, r in pairs(remote) do
-        versions[key] = r.version
-        if changed[key] then baseline[key] = acknowledged(r.value, changed[key].value, after[key]) end
-    end
+	local before = snapshot(); local changed = {}
+	for key, record in pairs(remote) do
+		if force or versions[key] ~= record.version or pending[key] or meshRetry[key] or referenceRetry[key] or (appearanceRetry[key] and appearanceRetry[key] <= os.clock()) then
+			changed[key] = {version = record.version, value = force and copy(record.value) or merge(baseline[key], before[key], record.value)}
+		end
+	end
+	for key, r in pairs(changed) do
+		if r.value and r.value.class ~= "PTTerrainChunk" and not objects[key] then
+			if r.value.isToolbox and r.value.assetId and r.value.assetId > 0 then
+				pending[key] = true
+				task.spawn(function()
+					local ok, asset = pcall(function() return InsertService:LoadAsset(r.value.assetId) end)
+					if ok and asset then
+						local model = asset:GetChildren()[1] or asset
+						model.Name = r.value.name; model:SetAttribute("PT_ObjectId", key); objects[key] = model; ids[model] = key
+						local targetPivot = r.value.props and (r.value.props.WorldPivot or r.value.props.CFrame)
+						if targetPivot then pcall(function() model:PivotTo(decode(targetPivot)) end) end
+						if r.value.modelScale then pcall(function() model:ScaleTo(r.value.modelScale) end) end
+						model.Parent = objects[r.value.parent] or workspace; asset:Destroy()
+						pending[key] = nil
+						status("Toolbox model loaded: "..model.Name)
+					else
+						local ok2, obj = pcall(Instance.new, r.value.class)
+						if ok2 then
+							if obj:IsA("BasePart") then for _, s in ipairs({"TopSurface", "BottomSurface", "LeftSurface", "RightSurface", "FrontSurface", "BackSurface"}) do obj[s] = Enum.SurfaceType.Smooth end end
+							obj:SetAttribute("PT_ObjectId", key); objects[key] = obj; ids[obj] = key; pending[key] = nil; warnings[key..":create"] = nil
+						end
+					end
+				end)
+			else
+				local ok, obj = pcall(Instance.new, r.value.class)
+				if ok then
+					if obj:IsA("BasePart") then for _, s in ipairs({"TopSurface", "BottomSurface", "LeftSurface", "RightSurface", "FrontSurface", "BackSurface"}) do obj[s] = Enum.SurfaceType.Smooth end end
+					obj:SetAttribute("PT_ObjectId", key); objects[key] = obj; ids[obj] = key; pending[key] = nil; warnings[key..":create"] = nil
+				else pending[key] = true; warn(key..":create", r.value.name..": class cannot be created via API") end
+			end
+		end
+	end
+	for key, r in pairs(changed) do local v = r.value; local obj = objects[key]
+		if v and obj then
+			local ok = pcall(function() if obj.Name ~= v.name then obj.Name = v.name end; if not serviceIds[key] then local parent = objects[v.parent]; if not parent then error("Parent unavailable") end; if obj.Parent ~= parent then obj.Parent = parent end end end)
+			if ok then pending[key] = nil; warnings[key..":parent"] = nil else pending[key] = true; warn(key..":parent", v.name..": waiting for parent object") end
+		end
+	end
+	local models = {}
+	for key, r in pairs(changed) do local obj = objects[key]; if r.value and obj and obj:IsA("Model") and r.value.modelScale then table.insert(models, {key = key, record = r, obj = obj}) end end
+	local function depth(obj) local n = 0; while obj.Parent do n += 1; obj = obj.Parent end; return n end
+	table.sort(models, function(a, b) return depth(a.obj) < depth(b.obj) end)
+	for _, item in ipairs(models) do
+		local value = item.record.value.modelScale
+		if type(value) == "number" and value > 0 and math.abs(item.obj:GetScale() - value) > 1e-6 then
+			local safe = true
+			if not force then for _, child in ipairs(item.obj:GetDescendants()) do local key = ids[child]; if key and not equal(before[key], sent[key]) then safe = false; break end end end
+			if safe then local ok = pcall(function() item.obj:ScaleTo(value) end); if ok then warnings[item.key..":scale"] = nil else warn(item.key..":scale", item.obj.Name..": model scale unavailable") end end
+		end
+	end
+	for key, r in pairs(changed) do local v = r.value; local obj = objects[key]
+		if not v then appearanceRetry[key] = nil end
+		if v and obj and not pending[key] then
+			referenceRetry[key] = nil
+			appearanceRetry[key] = nil
+			loadMesh(obj, key, v)
+			local values = {}
+			for name, value in pairs(v.props) do if not (obj:IsA("MeshPart") and (name == "MeshId" or name == "MeshContent" or name == "CollisionFidelity" or name == "RenderFidelity" or name == "FluidFidelity")) then table.insert(values, {name, value}) end end
+			local function priority(pair)
+				local name, value = pair[1], pair[2]
+				if name == "Shape" then return 0 end
+				if name == "Size" then return 2 end
+				if name == "CFrame" or name == "WorldPivot" then return 3 end
+				if type(value) == "table" and value.t == "Instance" then return 4 end
+				if name == "Source" then return 5 end
+				return 1
+			end
+			table.sort(values, function(a, b) local aa, bb = priority(a), priority(b); if aa == bb then return a[1] < b[1] end; return aa < bb end)
+			for _, pair in ipairs(values) do local name, value = pair[1], pair[2]
+				local ok = pcall(function()
+					if type(value) == "table" and value.t == "Instance" and not objects[value.v] then referenceRetry[key] = true; error("Linked instance still loading") end
+					if name == "Source" and obj:IsA("LuaSourceContainer") then if Editor:GetEditorSource(obj) ~= value then Editor:UpdateSourceAsync(obj, function() return value end) end
+					elseif obj:IsA("Model") and (name == "CFrame" or name == "WorldPivot") then local cf = decode(value); if typeof(cf) == "CFrame" then obj:PivotTo(cf) end
+					elseif not equal(encode(obj[name]), value) then obj[name] = decode(value) end
+				end)
+				if ok then warnings[key..":"..name] = nil else warn(key..":"..name, v.name.."."..name..": unavailable via API"); if appearanceSet[name] then appearanceRetry[key] = os.clock() + 10 end end
+			end
+			if v.attributes then
+				for name in pairs(obj:GetAttributes()) do if name ~= "PT_ObjectId" and v.attributes[name] == nil then local ok = pcall(function() obj:SetAttribute(name, nil) end); if not ok then warn(key..":attribute:"..name, v.name..": attribute protected by Roblox") end end end
+				for name, value in pairs(v.attributes) do local ok = pcall(function() if not equal(encode(obj:GetAttribute(name)), value) then obj:SetAttribute(name, decode(value)) end end); if not ok then warn(key..":attribute:"..name, v.name..": failed to apply attribute "..name) end end
+			end
+			if v.tags then local tags = {}; for _, tag in ipairs(v.tags) do tags[tag] = true; if not Collection:HasTag(obj, tag) then Collection:AddTag(obj, tag) end end; for _, tag in ipairs(Collection:GetTags(obj)) do if not tags[tag] then Collection:RemoveTag(obj, tag) end end end
+		elseif not v and obj and not serviceIds[key] then local ok = pcall(function() obj:Destroy() end); if ok then ids[obj] = nil; objects[key] = nil; pending[key] = nil; meshRetry[key] = nil; referenceRetry[key] = nil else warn(key..":delete", obj.Name..": Roblox prevented deletion") end end
+	end
+	for key, r in pairs(changed) do if key:sub(1, 9) == "~Terrain/" then applyTerrain(key, r.value) end end
+	local after = snapshot()
+	for key, r in pairs(remote) do
+		versions[key] = r.version
+		if changed[key] then baseline[key] = acknowledged(r.value, changed[key].value, after[key]) end
+	end
 end
 
 local function blocked(obj, key)
-    if pending[key] then return true end
-    if not obj then return false end
-    local parent = obj.Parent
-    while parent and parent ~= game do local parentId = ids[parent]; if parentId and pending[parentId] then return true end; parent = parent.Parent end
-    return false
+	if pending[key] then return true end
+	if not obj then return false end
+	local parent = obj.Parent
+	while parent and parent ~= game do local parentId = ids[parent]; if parentId and pending[parentId] then return true end; parent = parent.Parent end
+	return false
 end
 
 local function changes(current)
-    local list = {}; local seen = {}
-    for key, value in pairs(current) do seen[key] = true; if not blocked(objects[key], key) and not equal(value, baseline[key]) then table.insert(list, {id = key, version = versions[key] or 0, value = value}) end end
-    for key in pairs(baseline) do if not seen[key] and not pending[key] then table.insert(list, {id = key, version = versions[key] or 0, deleted = true}) end end
-    return list
+	local list = {}; local seen = {}
+	for key, value in pairs(current) do seen[key] = true; if not blocked(objects[key], key) and not equal(value, baseline[key]) then table.insert(list, {id = key, version = versions[key] or 0, value = value}) end end
+	for key in pairs(baseline) do if not seen[key] and not pending[key] then table.insert(list, {id = key, version = versions[key] or 0, deleted = true}) end end
+	return list
 end
 
+-- ИСПРАВЛЕНИЕ ЗДЕСЬ: Плагин больше не отправляет одни и те же данные бесконечно!
 local function sendChanges(current)
-    local list = changes(current)
-    if #list &gt; 0 then
-        local result = request(&quot;POST&quot;, {changes = list})
-        if not result.conflict then warnings.syncConflict = nil; return result end
-    end
-    local latest = request(&quot;GET&quot;)
-    apply(latest.objects, current, false)
-    warnings.syncConflict = nil
-    return latest
+	local list = changes(current)
+	if #list > 0 then
+		local result = request("POST", {changes = list, since = currentRevision})
+		if not result.conflict then
+			warnings.syncConflict = nil
+			currentRevision = result.revision
+
+			-- ГЛАВНЫЙ ФИКС: Записываем отправленные данные в baseline, чтобы не спамить ими сервер 4 раза в сек.
+			for _, ch in ipairs(list) do
+				if ch.deleted then
+					baseline[ch.id] = nil
+					versions[ch.id] = nil
+				else
+					baseline[ch.id] = copy(ch.value)
+					versions[ch.id] = currentRevision
+				end
+			end
+
+			if result.remoteChanges and next(result.remoteChanges) then
+				apply(result.remoteChanges, current, false)
+			end
+			return {revision = currentRevision, objects = {}}
+		end
+	end
+
+	local latest = request("GET")
+	if latest.unchanged then
+		return {revision = currentRevision, objects = {}}
+	end
+
+	currentRevision = latest.revision
+	if latest.delta then
+		apply(latest.objects, current, false)
+	else
+		apply(latest.objects, current, true)
+	end
+
+	warnings.syncConflict = nil
+	return latest
 end
 
 local function connectSession()
-    if busy then return end
-    if active then
-        if Run:IsRunning() then status(&quot;Stop Play mode before leaving session.&quot;); return end
-        busy = true
-        local ok, err = pcall(function()
-            local current = snapshot()
-            local remote = sendChanges(current)
-            apply(remote.objects, current, false)
-            if warnings.syncConflict then error(&quot;Unsent edits remain. Retry leaving in a few seconds.&quot;) end
-        end)
-        busy = false
-        if not ok then status(&quot;Cannot leave: unsent changes. &quot;..tostring(err)); return end
-        restoreSuppressed = true; active = false; connect.Text = &quot;Reconnect to Session&quot;; status(&quot;Changes synced to session. Safe to close local copy.&quot;)
-        return
-    end
-    if Run:IsRunning() then status(&quot;Stop Play/Test mode before connecting.&quot;); return end
-    busy = true
-    local ok, err = pcall(function()
-        if setup.Text:match(&quot;^%s*{&quot;) then local c = Http:JSONDecode(setup.Text); address.Text = c.server; room.Text = c.room; token.Text = c.token; setup.Text = &quot;&quot; end
-        local base = address.Text:gsub(&quot;%s+&quot;, &quot;&quot;):gsub(&quot;/+$&quot;, &quot;&quot;)
-        if not base:match(&quot;^https?://&quot;) then error(&quot;Enter server address with http:// or https://&quot;) end
-        endpoint = base..&quot;/api/rooms/&quot;..room.Text..&quot;/sync&quot;; credential = token.Text
-        plugin:SetSetting(&quot;PTAddress&quot;, base); plugin:SetSetting(&quot;PTRoom&quot;, room.Text)
-        index(); local current = snapshot(); local state = request(&quot;GET&quot;)
-        if next(state.objects) == nil then
-            if not state.owner then error(&quot;Host has not published the place yet&quot;) end
-            state = sendChanges(current)
-        end
-        apply(state.objects, current, true)
-        local after = snapshot(); for key, value in pairs(after) do if not versions[key] then baseline[key] = value end end
-        active = true; accept.Visible = false; connect.Text = &quot;Leave Session&quot;; status(&quot;Place connected. Real-time sync enabled.&quot;..warningText())
-    end)
-    busy = false; if not ok then active = false; status(tostring(err)); accept.Visible = endpoint ~= nil end
+	if busy then return end
+	if active then
+		if Run:IsRunning() then status("Stop Play mode before leaving session."); return end
+		busy = true
+		local ok, err = pcall(function()
+			local current = snapshot()
+			local remote = sendChanges(current)
+			if warnings.syncConflict then error("Unsent edits remain. Retry leaving in a few seconds.") end
+		end)
+		busy = false
+		if not ok then status("Cannot leave: unsent changes. "..tostring(err)); return end
+		restoreSuppressed = true; active = false; connect.Text = "Reconnect to Session"; status("Changes synced to session. Safe to close local copy.")
+		return
+	end
+	if Run:IsRunning() then status("Stop Play/Test mode before connecting."); return end
+	busy = true
+	local ok, err = pcall(function()
+		if setup.Text:match("^%s*{") then local c = Http:JSONDecode(setup.Text); address.Text = c.server; room.Text = c.room; token.Text = c.token; setup.Text = "" end
+		local base = address.Text:gsub("%s+", ""):gsub("/+$", "")
+		if not base:match("^https?://") then error("Enter server address with http:// or https://") end
+		endpoint = base.."/api/rooms/"..room.Text.."/sync"; credential = token.Text
+		plugin:SetSetting("PTAddress", base); plugin:SetSetting("PTRoom", room.Text)
+
+		index()
+		local current = snapshot(); local state = request("GET")
+		if state.unchanged or next(state.objects or {}) == nil then
+			if not state.owner then error("Host has not published the place yet") end
+			state = sendChanges(current)
+		end
+
+		if state.objects and next(state.objects) ~= nil then
+			apply(state.objects, current, true)
+		end
+		currentRevision = state.revision or currentRevision
+
+		local after = snapshot(); for key, value in pairs(after) do if not versions[key] then baseline[key] = value end end
+		active = true; accept.Visible = false; connect.Text = "Leave Session"; status("Place connected. Real-time sync enabled."..warningText())
+	end)
+	busy = false; if not ok then active = false; status(tostring(err)); accept.Visible = endpoint ~= nil end
 end
 
 local inbox = nil
@@ -1004,354 +1079,377 @@ local lastSent = nil
 local inviting = false
 local polling = false
 
-local function base() return address.Text:gsub(&quot;%s+&quot;, &quot;&quot;):gsub(&quot;/+$&quot;, &quot;&quot;) end
+local function base() return address.Text:gsub("%s+", ""):gsub("/+$", "") end
 
 local function api(path, method, payload, renewed)
-    local t0 = os.clock()
-    local response = Http:RequestAsync({Url = base()..&quot;/api&quot;..path, Method = method or &quot;GET&quot;, Headers = {Authorization = &quot;Bearer &quot;..token.Text, [&quot;Content-Type&quot;] = &quot;application/json&quot;, [&quot;bypass-tunnel-reminder&quot;] = &quot;true&quot;}, Body = payload and Http:JSONEncode(payload) or nil})
-    if response.StatusCode == 401 and path ~= &quot;/guest&quot; and not renewed then guestEnter(); return api(path, method, payload, true) end
-    local decoded, data = pcall(function() return Http:JSONDecode(response.Body) end)
-    if not decoded then error(&quot;Server unavailable (HTTP &quot;..response.StatusCode..&quot;). Check server address and verify server is running.&quot;) end
-    if not response.Success then error(data.error or (&quot;HTTP &quot;..response.StatusCode)) end
-    return data
+	local t0 = os.clock()
+	local reqUrl = base().."/api"..path
+	if (method or "GET") == "GET" then
+		reqUrl = reqUrl .. (reqUrl:find("?") and "&" or "?") .. "_t=" .. tostring(os.clock())
+	end
+
+	local response = Http:RequestAsync({Url = reqUrl, Method = method or "GET", Headers = {Authorization = "Bearer "..token.Text, ["Content-Type"] = "application/json", ["bypass-tunnel-reminder"] = "true"}, Body = payload and Http:JSONEncode(payload) or nil})
+	if response.StatusCode == 401 and path ~= "/guest" and not renewed then guestEnter(); return api(path, method, payload, true) end
+	local decoded, data = pcall(function() return Http:JSONDecode(response.Body) end)
+	if not decoded then error("Server unavailable (HTTP "..response.StatusCode.."). Check server address and verify server is running.") end
+	if not response.Success then error(data.error or ("HTTP "..response.StatusCode)) end
+	return data
 end
 
 guestEnter = function(rename)
-    if not base():match(&quot;^https?://&quot;) then status(&quot;Enter server address in Settings tab&quot;); return end
-    local key = plugin:GetSetting(&quot;PTGuestDeviceKey&quot;) or plugin:GetSetting(&quot;PTGuestDeviceKey:&quot;..base())
-    if type(key) ~= &quot;string&quot; or #key ~= 64 then key = (Http:GenerateGUID(false)..Http:GenerateGUID(false)):gsub(&quot;-&quot;, &quot;&quot;):lower(); plugin:SetSetting(&quot;PTGuestDeviceKey:&quot;..base(), key) end
-    if selfNick.Text == &quot;&quot; then
-        pcall(function() local uid = game:GetService(&quot;StudioService&quot;):GetUserId(); if uid &gt; 0 then selfNick.Text = game:GetService(&quot;Players&quot;):GetNameFromUserIdAsync(uid) end end)
-        if selfNick.Text == &quot;&quot; then selfNick.Text = &quot;User_&quot;..key:sub(1, 6) end
-    end
-    plugin:SetSetting(&quot;PTGuestDeviceKey&quot;, key)
-    local value = api(&quot;/guest&quot;, &quot;POST&quot;, {name = selfNick.Text, deviceKey = key, rename = rename == True})
-    token.Text = value.token; credential = value.token; selfNick.Text = value.name; loggedIn = true
-    plugin:SetSetting(&quot;PTInviteToken:&quot;..base(), value.token); plugin:SetSetting(&quot;PTInviteName&quot;, value.name); plugin:SetSetting(&quot;PTAddress&quot;, base())
-    status(&quot;Your username: &quot;..value.name..&quot;. Ready to invite friends.&quot;)
-    return value
+	if not base():match("^https?://") then status("Enter server address in Settings tab"); return end
+	local key = plugin:GetSetting("PTGuestDeviceKey") or plugin:GetSetting("PTGuestDeviceKey:"..base())
+	if type(key) ~= "string" or #key ~= 64 then key = (Http:GenerateGUID(false)..Http:GenerateGUID(false)):gsub("-", ""):lower(); plugin:SetSetting("PTGuestDeviceKey:"..base(), key) end
+	if selfNick.Text == "" then
+		pcall(function() local uid = game:GetService("StudioService"):GetUserId(); if uid > 0 then selfNick.Text = game:GetService("Players"):GetNameFromUserIdAsync(uid) end end)
+		if selfNick.Text == "" then selfNick.Text = "User_"..key:sub(1, 6) end
+	end
+	plugin:SetSetting("PTGuestDeviceKey", key)
+	local value = api("/guest", "POST", {name = selfNick.Text, deviceKey = key, rename = rename == true})
+	token.Text = value.token; credential = value.token; selfNick.Text = value.name; loggedIn = true
+	plugin:SetSetting("PTInviteToken:"..base(), value.token); plugin:SetSetting("PTInviteName", value.name); plugin:SetSetting("PTAddress", base())
+	status("Your username: "..value.name..". Ready to invite friends.")
+	return value
 end
 
 local function openHost()
-    if not loggedIn then guestEnter() end
-    if active then return end
-    local storage = game:GetService(&quot;ReplicatedStorage&quot;)
-    local saved = storage:GetAttribute(&quot;PT_SavedRoom&quot;)
-    if type(saved) == &quot;string&quot; and saved:match(&quot;^[a-f0-9]+$&quot;) and storage:GetAttribute(&quot;PT_SavedServer&quot;) == base() then
-        local accessible, info = pcall(function() return api(&quot;/rooms/&quot;..saved..&quot;/state&quot;) end)
-        if accessible and not info.closed then
-            room.Text = saved; sessionTitle.Text = info.name; connectSession()
-            if not active then error(notice.Text) end
-            return
-        end
-        storage:SetAttribute(&quot;PT_SavedRoom&quot;, nil); storage:SetAttribute(&quot;PT_SavedServer&quot;, nil)
-        restoreSuppressed = true; room.Text = &quot;&quot;
-    end
-    local value = api(&quot;/rooms&quot;, &quot;POST&quot;, {name = game.Name})
-    room.Text = value.id
-    sessionTitle.Text = game.Name
-    connectSession()
-    if not active then error(notice.Text) end
-    storage:SetAttribute(&quot;PT_SavedRoom&quot;, value.id)
-    storage:SetAttribute(&quot;PT_SavedServer&quot;, base())
-    connect.Visible = true
+	if not loggedIn then guestEnter() end
+	if active then return end
+	local storage = game:GetService("ReplicatedStorage")
+	local saved = storage:GetAttribute("PT_SavedRoom")
+	if type(saved) == "string" and saved:match("^[a-f0-9]+$") and storage:GetAttribute("PT_SavedServer") == base() then
+		local accessible, info = pcall(function() return api("/rooms/"..saved.."/state") end)
+		if accessible and not info.closed then
+			room.Text = saved; sessionTitle.Text = info.name; connectSession()
+			if not active then error(notice.Text) end
+			return
+		end
+		storage:SetAttribute("PT_SavedRoom", nil); storage:SetAttribute("PT_SavedServer", nil)
+		restoreSuppressed = true; room.Text = ""
+	end
+	local value = api("/rooms", "POST", {name = game.Name})
+	room.Text = value.id
+	sessionTitle.Text = game.Name
+	connectSession()
+	if not active then error(notice.Text) end
+	storage:SetAttribute("PT_SavedRoom", value.id)
+	storage:SetAttribute("PT_SavedServer", base())
+	connect.Visible = true
 end
 
 local function inviteUser()
-    if inviting then return end
-    inviting = true
-    local ok, err = pcall(function()
-        if #nick.Text:gsub(&quot;%s+&quot;, &quot;&quot;) &lt; 3 then error(&quot;Enter friend&apos;s plugin username&quot;) end
-        openHost()
-        local sent = api(&quot;/invitations&quot;, &quot;POST&quot;, {room = room.Text, nick = nick.Text}); lastSent = sent.id
-        inviteStatus.Text = sent.recipientOnline and (&quot;Waiting for acceptance: &quot;..nick.Text) or (&quot;Request saved. Waiting for &apos;&quot;..nick.Text..&quot;&apos; to open the plugin.&quot;)
-        status(inviteStatus.Text)
-    end)
-    inviting = false; if not ok then inviteStatus.Text = tostring(err); status(tostring(err)) end
+	if inviting then return end
+	inviting = true
+	local ok, err = pcall(function()
+		if #nick.Text:gsub("%s+", "") < 3 then error("Enter friend's plugin username") end
+		openHost()
+		local sent = api("/invitations", "POST", {room = room.Text, nick = nick.Text}); lastSent = sent.id
+		inviteStatus.Text = sent.recipientOnline and ("Waiting for acceptance: "..nick.Text) or ("Request saved. Waiting for '"..nick.Text.."' to open the plugin.")
+		status(inviteStatus.Text)
+	end)
+	inviting = false; if not ok then inviteStatus.Text = tostring(err); status(tostring(err)) end
 end
 invite.MouseButton1Click:Connect(inviteUser)
 
 local function emptyPlace()
-    for _, service in ipairs({&quot;ReplicatedStorage&quot;, &quot;ServerScriptService&quot;, &quot;ServerStorage&quot;, &quot;StarterGui&quot;, &quot;StarterPack&quot;}) do
-        if #game:GetService(service):GetChildren() &gt; 0 then return false end
-    end
-    for _, obj in ipairs(workspace:GetChildren()) do
-        if not obj:IsA(&quot;Terrain&quot;) and not obj:IsA(&quot;Camera&quot;) and obj.Name ~= &quot;Baseplate&quot; and not obj:IsA(&quot;SpawnLocation&quot;) then return false end
-    end
-    return true
+	for _, service in ipairs({"ReplicatedStorage", "ServerScriptService", "ServerStorage", "StarterGui", "StarterPack"}) do
+		if #game:GetService(service):GetChildren() > 0 then return false end
+	end
+	for _, obj in ipairs(workspace:GetChildren()) do
+		if not obj:IsA("Terrain") and not obj:IsA("Camera") and obj.Name ~= "Baseplate" and not obj:IsA("SpawnLocation") then return false end
+	end
+	return true
 end
 
 local function focusImportedPlace()
-    local low = Vector3.new(math.huge, math.huge, math.huge)
-    local high = Vector3.new(-math.huge, -math.huge, -math.huge)
-    local count = 0
-    for key, obj in pairs(objects) do
-        if obj:IsA(&quot;BasePart&quot;) and obj:IsDescendantOf(workspace) then
-            local a = obj.Position - obj.Size / 2; local b = obj.Position + obj.Size / 2
-            low = Vector3.new(math.min(low.X, a.X), math.min(low.Y, a.Y), math.min(low.Z, a.Z))
-            high = Vector3.new(math.max(high.X, b.X), math.max(high.Y, b.Y), math.max(high.Z, b.Z)); count += 1
-        end
-    end
-    if count &gt; 0 and workspace.CurrentCamera then
-        local center = (low + high) / 2; local span = high - low; local distance = math.max(20, math.max(span.X, span.Y, span.Z) * 1.1)
-        workspace.CurrentCamera.CFrame = CFrame.lookAt(center + Vector3.new(distance * .65, distance * .5, distance), center)
-        workspace.CurrentCamera.Focus = CFrame.new(center)
-    end
+	local low = Vector3.new(math.huge, math.huge, math.huge)
+	local high = Vector3.new(-math.huge, -math.huge, -math.huge)
+	local count = 0
+	for key, obj in pairs(objects) do
+		if obj:IsA("BasePart") and obj:IsDescendantOf(workspace) then
+			local a = obj.Position - obj.Size / 2; local b = obj.Position + obj.Size / 2
+			low = Vector3.new(math.min(low.X, a.X), math.min(low.Y, a.Y), math.min(low.Z, a.Z))
+			high = Vector3.new(math.max(high.X, b.X), math.max(high.Y, b.Y), math.max(high.Z, b.Z)); count += 1
+		end
+	end
+	if count > 0 and workspace.CurrentCamera then
+		local center = (low + high) / 2; local span = high - low; local distance = math.max(20, math.max(span.X, span.Y, span.Z) * 1.1)
+		workspace.CurrentCamera.CFrame = CFrame.lookAt(center + Vector3.new(distance * .65, distance * .5, distance), center)
+		workspace.CurrentCamera.Focus = CFrame.new(center)
+	end
 end
 
 local function acceptInvitation()
-    if not inbox or inviting or busy then return end
-    if active then status(&quot;Disconnect from current session first.&quot;); return end
-    if not emptyPlace() then status(&quot;Open a new empty Baseplate: File -&gt; New. Current place was not overwritten.&quot;); return end
-    inviting = true
-    local ok, err = pcall(function()
-        local result = api(&quot;/invitations/&quot;..inbox.id..&quot;/respond&quot;, &quot;POST&quot;, {decision = &quot;accept&quot;})
-        room.Text = result.room.id; inbox = nil; yes.Visible = false; no.Visible = false
-        sessionTitle.Text = result.room.name
-        local initial = api(&quot;/rooms/&quot;..room.Text..&quot;/sync&quot;)
-        if not initial.objects or next(initial.objects) == nil then error(&quot;Host has not published the place yet. Click Reconnect in a few moments.&quot;) end
-        local defaults = {}; for _, obj in ipairs(workspace:GetChildren()) do if obj.Name == &quot;Baseplate&quot; or obj:IsA(&quot;SpawnLocation&quot;) then table.insert(defaults, obj) end end
-        connectSession(); connect.Visible = active
-        if not active then error(notice.Text) end
-        for _, obj in ipairs(defaults) do local key = ids[obj]; if key and not initial.objects[key] then baseline[key] = nil; objects[key] = nil; ids[obj] = nil; obj:Destroy() end end
-        focusImportedPlace()
-        incoming.Text = &quot;You are collaborating on &quot;..result.room.name..&quot; together.&quot;
-    end)
-    inviting = false; if not ok then status(tostring(err)) end
+	if not inbox or inviting or busy then return end
+	if active then status("Disconnect from current session first."); return end
+	if not emptyPlace() then status("Open a new empty Baseplate: File -> New. Current place was not overwritten."); return end
+	inviting = true
+	local ok, err = pcall(function()
+		local result = api("/invitations/"..inbox.id.."/respond", "POST", {decision = "accept"})
+		room.Text = result.room.id; inbox = nil; yes.Visible = false; no.Visible = false
+		sessionTitle.Text = result.room.name
+
+		index()
+		local initial = api("/rooms/"..room.Text.."/sync")
+		if not initial.objects or next(initial.objects) == nil then error("Host has not published the place yet. Click Reconnect in a few moments.") end
+		local defaults = {}; for _, obj in ipairs(workspace:GetChildren()) do if obj.Name == "Baseplate" or obj:IsA("SpawnLocation") then table.insert(defaults, obj) end end
+		connectSession(); connect.Visible = active
+		if not active then error(notice.Text) end
+		for _, obj in ipairs(defaults) do local key = ids[obj]; if key and not initial.objects[key] then baseline[key] = nil; objects[key] = nil; ids[obj] = nil; obj:Destroy() end end
+		focusImportedPlace()
+		incoming.Text = "You are collaborating on "..result.room.name.." together."
+	end)
+	inviting = false; if not ok then status(tostring(err)) end
 end
 yes.MouseButton1Click:Connect(acceptInvitation)
 
 retry.MouseButton1Click:Connect(function()
-    if busy or active or room.Text == &quot;&quot; then return end
-    connectSession(); connect.Visible = active
-    if active then focusImportedPlace() end
+	if busy or active or room.Text == "" then return end
+	connectSession(); connect.Visible = active
+	if active then focusImportedPlace() end
 end)
 
 no.MouseButton1Click:Connect(function()
-    if not inbox or inviting then return end
-    inviting = true
-    local ok, err = pcall(function() api(&quot;/invitations/&quot;..inbox.id..&quot;/respond&quot;, &quot;POST&quot;, {decision = &quot;decline&quot;}); inbox = nil; yes.Visible = false; no.Visible = false; incoming.Text = &quot;Invitation declined.&quot; end)
-    inviting = false; if not ok then status(tostring(err)) end
+	if not inbox or inviting then return end
+	inviting = true
+	local ok, err = pcall(function() api("/invitations/"..inbox.id.."/respond", "POST", {decision = "decline"}); inbox = nil; yes.Visible = false; no.Visible = false; incoming.Text = "Invitation declined." end)
+	inviting = false; if not ok then status(tostring(err)) end
 end)
 
 connect.MouseButton1Click:Connect(connectSession)
 
 accept.MouseButton1Click:Connect(function()
-    if busy or not endpoint then return end
-    busy = true
-    local ok, err = pcall(function() local current = snapshot(); local state = request(&quot;GET&quot;); apply(state.objects, current, true); active = true; connect.Visible = true; accept.Visible = false; status(&quot;Server version accepted.&quot;) end)
-    busy = false; if not ok then status(tostring(err)) end
+	if busy or not endpoint then return end
+	busy = true
+	local ok, err = pcall(function() local current = snapshot(); local state = request("GET"); apply(state.objects, current, true); active = true; connect.Visible = true; accept.Visible = false; status("Server version accepted.") end)
+	busy = false; if not ok then status(tostring(err)) end
 end)
 
 task.spawn(function()
-    if selfNick.Text == &quot;&quot; then pcall(function() local uid = game:GetService(&quot;StudioService&quot;):GetUserId(); if uid &gt; 0 then selfNick.Text = game:GetService(&quot;Players&quot;):GetNameFromUserIdAsync(uid) end end) end
-    if address.Text ~= &quot;&quot; and address.Text:match(&quot;^https?://&quot;) then
-        local ready, reason = pcall(guestEnter)
-        if not ready then status(&quot;Failed to connect. Check server address in Settings. &quot;..tostring(reason)) end
-    else
-        status(&quot;Enter server address in Settings tab&quot;)
-    end
-    while true do
-        task.wait(1.5)
-        if not loggedIn and not inviting and not polling then pcall(guestEnter) end
-        if loggedIn and not polling and not inviting then
-            polling = true
-            local ok, err = pcall(function()
-                local invitations = api(&quot;/invitations&quot;)
-                if lastSent then
-                    for _, sent in ipairs(api(&quot;/invitations/outbox&quot;)) do if sent.id == lastSent then
-                        if sent.state == &quot;accepted&quot; then inviteStatus.Text = &quot;Friend accepted invitation.&quot;; lastSent = nil
-                        elseif sent.state == &quot;declined&quot; then inviteStatus.Text = &quot;Friend declined invitation.&quot;; lastSent = nil
-                        elseif sent.delivered then inviteStatus.Text = &quot;Request received by friend&apos;s plugin. Waiting for acceptance.&quot;
-                        elseif sent.recipientOnline then inviteStatus.Text = &quot;Friend is online. Delivering invitation...&quot;
-                        else inviteStatus.Text = &quot;Friend has not received request yet. Check username and plugin version.&quot; end
-                    end end
-                end
-                local nextInvite = invitations[#invitations]
-                if nextInvite and (not inbox or inbox.id ~= nextInvite.id) then
-                    inbox = nextInvite; incoming.Text = nextInvite.from..&quot; invited you to &apos;&quot;..nextInvite.place..&quot;&apos;. Open an empty place before accepting.&quot;; yes.Visible = true; no.Visible = true; uiTab = &quot;home&quot;; widget.Enabled = true
-                elseif not nextInvite and inbox then inbox = nil; yes.Visible = false; no.Visible = false; incoming.Text = &quot;No new invitations.&quot; end
-            end)
-            polling = false; if not ok then incoming.Text = &quot;Failed to check invitations: &quot;..tostring(err) end
-        end
-    end
+	if selfNick.Text == "" then pcall(function() local uid = game:GetService("StudioService"):GetUserId(); if uid > 0 then selfNick.Text = game:GetService("Players"):GetNameFromUserIdAsync(uid) end end) end
+	if address.Text ~= "" and address.Text:match("^https?://") then
+		local ready, reason = pcall(guestEnter)
+		if not ready then status("Failed to connect. Check server address in Settings. "..tostring(reason)) end
+	else
+		status("Enter server address in Settings tab")
+	end
+	while true do
+		task.wait(1.5)
+		if not loggedIn and not inviting and not polling then pcall(guestEnter) end
+		if loggedIn and not polling and not inviting then
+			polling = true
+			local ok, err = pcall(function()
+				local invitations = api("/invitations")
+				if lastSent then
+					for _, sent in ipairs(api("/invitations/outbox")) do if sent.id == lastSent then
+							if sent.state == "accepted" then inviteStatus.Text = "Friend accepted invitation."; lastSent = nil
+							elseif sent.state == "declined" then inviteStatus.Text = "Friend declined invitation."; lastSent = nil
+							elseif sent.delivered then inviteStatus.Text = "Request received by friend's plugin. Waiting for acceptance."
+							elseif sent.recipientOnline then inviteStatus.Text = "Friend is online. Delivering invitation..."
+							else inviteStatus.Text = "Friend has not received request yet. Check username and plugin version." end
+						end end
+				end
+				local nextInvite = invitations[#invitations]
+				if nextInvite and (not inbox or inbox.id ~= nextInvite.id) then
+					inbox = nextInvite; incoming.Text = nextInvite.from.." invited you to '"..nextInvite.place.."'. Open an empty place before accepting."; yes.Visible = true; no.Visible = true; uiTab = "home"; widget.Enabled = true
+				elseif not nextInvite and inbox then inbox = nil; yes.Visible = false; no.Visible = false; incoming.Text = "No new invitations." end
+			end)
+			polling = false; if not ok then incoming.Text = "Failed to check invitations: "..tostring(err) end
+		end
+	end
 end)
 
 task.spawn(function()
-    while true do
-        task.wait(.25) -- 250ms ultra fast loop (Parts + Full Terrain + Toolbox)
-        if active and not busy and not Run:IsRunning() then
-            busy = true
-            local ok, err = pcall(function()
-                local current = snapshot()
-                local state = sendChanges(current)
-                status((warnings.syncConflict and &quot;Unsent changes pending&quot; or (&quot;Server confirmed rev &quot;..state.revision))..&quot; · session &quot;..room.Text:sub(1, 8)..warningText())
-            end)
-            busy = false
-            if not ok then status(&quot;Sync temporarily failed; retrying automatically. Local changes preserved. &quot;..tostring(err)) end
-        elseif active and Run:IsRunning() then
-            status(&quot;Sync paused during Play mode. Stop game to resume editing.&quot;)
-        end
-    end
+	while true do
+		task.wait(0.5) 
+		if active and not busy and not Run:IsRunning() then
+			busy = true
+			local ok, err = pcall(function()
+				local current = snapshot()
+				local state = sendChanges(current)
+				status((warnings.syncConflict and "Unsent changes pending" or ("Server confirmed rev "..state.revision)).." · session "..room.Text:sub(1, 8)..warningText())
+			end)
+			busy = false
+			if not ok then status("Sync temporarily failed; retrying automatically. Local changes preserved. "..tostring(err)) end
+		elseif active and Run:IsRunning() then
+			status("Sync paused during Play mode. Stop game to resume editing.")
+		end
+	end
 end)
 
 plugin.Unloading:Connect(function()
-    if active and not busy and not Run:IsRunning() then
-        busy = true
-        pcall(function() local current = snapshot(); local remote = sendChanges(current); apply(remote.objects, current, false) end)
-        busy = false
-    end
-    active = false; loggedIn = false
+	if active and not busy and not Run:IsRunning() then
+		busy = true
+		pcall(function() local current = snapshot(); local remote = sendChanges(current) end)
+		busy = false
+	end
+	active = false; loggedIn = false
 end)
 
 logout.MouseButton1Click:Connect(function()
-    if busy or inviting then return end
-    inviting = true; local ok, err = pcall(guestEnter); inviting = false
-    if not ok then status(&quot;Check server in Settings. &quot;..tostring(err)) end
+	if busy or inviting then return end
+	inviting = true; local ok, err = pcall(guestEnter); inviting = false
+	if not ok then status("Check server in Settings. "..tostring(err)) end
 end)
 
 local previousAddress = base()
 address.FocusLost:Connect(function()
-    if base() == previousAddress then return end
-    if busy or inviting then address.Text = previousAddress; status(&quot;Please wait for current operation to finish.&quot;); return end
-    previousAddress = base(); active = false; loggedIn = false; inbox = nil; room.Text = &quot;&quot;; token.Text = &quot;&quot;
-    yes.Visible = false; no.Visible = false
-    plugin:SetSetting(&quot;PTAddress&quot;, base()); uiTab = &quot;home&quot;; local ok, err = pcall(guestEnter)
-    if not ok then status(&quot;Failed to connect to new server. &quot;..tostring(err)) end
+	if base() == previousAddress then return end
+	if busy or inviting then address.Text = previousAddress; status("Please wait for current operation to finish."); return end
+	previousAddress = base(); active = false; loggedIn = false; inbox = nil; room.Text = ""; token.Text = ""
+	yes.Visible = false; no.Visible = false
+	plugin:SetSetting("PTAddress", base()); uiTab = "home"; local ok, err = pcall(guestEnter)
+	if not ok then status("Failed to connect to new server. "..tostring(err)) end
 end)
 
 selfNick.FocusLost:Connect(function()
-    if busy or inviting then return end
-    local old = plugin:GetSetting(&quot;PTInviteName&quot;) or &quot;&quot;
-    if selfNick.Text == old then return end
-    inviting = true; local ok, err = pcall(function() guestEnter(true) end); inviting = false
-    if not ok then selfNick.Text = old; status(tostring(err)) end
+	if busy or inviting then return end
+	local old = plugin:GetSetting("PTInviteName") or ""
+	if selfNick.Text == old then return end
+	inviting = true; local ok, err = pcall(function() guestEnter(true) end); inviting = false
+	if not ok then selfNick.Text = old; status(tostring(err)) end
 end)
 
 task.spawn(function()
-    while true do
-        refreshUI(active, loggedIn, inbox ~= nil, busy or inviting)
-        task.wait(.25)
-    end
+	while true do
+		refreshUI(active, loggedIn, inbox ~= nil, busy or inviting)
+		task.wait(.25)
+	end
 end)
 
 -- Peer Cursors / Participant Avatars
 do
-    local alive = true
-    local enabled = plugin:GetSetting(&quot;PTShowParticipants&quot;) ~= false
-    local folder = nil
-    local markers = {}
-    local previousRoom = nil
-    local previousBase = nil
-    local sending = false
+	local alive = true
+	local enabled = plugin:GetSetting("PTShowParticipants") ~= false
+	local folder = nil
+	local markers = {}
+	local previousRoom = nil
+	local previousBase = nil
+	local sending = false
 
-    local function clear()
-        if folder then folder:Destroy(); folder = nil end
-        markers = {}
-    end
+	local function clear()
+		if folder then folder:Destroy(); folder = nil end
+		markers = {}
+	end
 
-    local function vector(v) return Vector3.new(v[1], v[2], v[3]) end
+	local function vector(v) return Vector3.new(v[1], v[2], v[3]) end
 
-    local function marker(peer)
-        if not folder then folder = Instance.new(&quot;Folder&quot;); folder.Name = &quot;PlaceTogetherPresence&quot;; folder.Archivable = false; folder.Parent = game:GetService(&quot;CoreGui&quot;) end
-        local group = Instance.new(&quot;Folder&quot;); group.Name = peer.id; group.Parent = folder
-        local tint = Color3.fromHSV(peer.hue, .65, 1)
-        local sphere = Instance.new(&quot;SphereHandleAdornment&quot;); sphere.Name = &quot;Participant&quot;; sphere.Adornee = workspace.Terrain; sphere.Radius = 1.5; sphere.Color3 = tint; sphere.Transparency = .15; sphere.AlwaysOnTop = false; sphere.Parent = group
-        pcall(function() sphere.Shading = Enum.AdornShading.Shaded end)
-        local direction = Instance.new(&quot;LineHandleAdornment&quot;); direction.Name = &quot;Direction&quot;; direction.Adornee = workspace.Terrain; direction.Color3 = tint; direction.Thickness = 3; direction.Parent = group
-        local caption = Instance.new(&quot;BillboardGui&quot;); caption.Name = &quot;Nickname&quot;; caption.Adornee = workspace.Terrain; caption.Size = UDim2.fromOffset(180, 32); caption.AlwaysOnTop = true; caption.MaxDistance = 2000; caption.Parent = group
-        local label = Instance.new(&quot;TextLabel&quot;); label.Size = UDim2.fromScale(1, 1); label.BackgroundTransparency = 1; label.Font = Enum.Font.GothamMedium; label.TextSize = 14; label.TextColor3 = tint; label.TextStrokeColor3 = Color3.fromRGB(20, 20, 25); label.TextStrokeTransparency = .2; label.Text = peer.name; label.Parent = caption
-        return {group = group, sphere = sphere, direction = direction, tint = tint, selection = {}, boxes = {}, caption = caption, label = label, position = vector(peer.position), target = vector(peer.position), look = vector(peer.look), targetLook = vector(peer.look), seen = os.clock()}
-    end
+	local function marker(peer)
+		if not folder then folder = Instance.new("Folder"); folder.Name = "PlaceTogetherPresence"; folder.Archivable = false; folder.Parent = game:GetService("CoreGui") end
+		local group = Instance.new("Folder"); group.Name = peer.id; group.Parent = folder
+		local tint = Color3.fromHSV(peer.hue, .65, 1)
+		local sphere = Instance.new("SphereHandleAdornment"); sphere.Name = "Participant"; sphere.Adornee = workspace.Terrain; sphere.Radius = 1.5; sphere.Color3 = tint; sphere.Transparency = .15; sphere.AlwaysOnTop = false; sphere.Parent = group
+		pcall(function() sphere.Shading = Enum.AdornShading.Shaded end)
+		local direction = Instance.new("LineHandleAdornment"); direction.Name = "Direction"; direction.Adornee = workspace.Terrain; direction.Color3 = tint; direction.Thickness = 3; direction.Parent = group
+		local caption = Instance.new("BillboardGui"); caption.Name = "Nickname"; caption.Adornee = workspace.Terrain; caption.Size = UDim2.fromOffset(180, 32); caption.AlwaysOnTop = true; caption.MaxDistance = 2000; caption.Parent = group
+		local label = Instance.new("TextLabel"); label.Size = UDim2.fromScale(1, 1); label.BackgroundTransparency = 1; label.Font = Enum.Font.GothamMedium; label.TextSize = 14; label.TextColor3 = tint; label.TextStrokeColor3 = Color3.fromRGB(20, 20, 25); label.TextStrokeTransparency = .2; label.Text = peer.name; label.Parent = caption
+		return {group = group, sphere = sphere, direction = direction, tint = tint, selection = {}, boxes = {}, caption = caption, label = label, position = vector(peer.position), target = vector(peer.position), look = vector(peer.look), targetLook = vector(peer.look), seen = os.clock()}
+	end
 
-    local function receive(peers)
-        local present = {}; local names = {}
-        for _, peer in ipairs(peers) do
-            present[peer.id] = true; table.insert(names, peer.name)
-            if enabled then
-                local item = markers[peer.id] or marker(peer); markers[peer.id] = item
-                item.target = vector(peer.position); item.targetLook = vector(peer.look); item.label.Text = peer.name; item.seen = os.clock()
-                item.selection = {}; for _, key in ipairs(peer.selected or {}) do item.selection[key] = true end
-                for key, box in pairs(item.boxes) do if not item.selection[key] then box:Destroy(); item.boxes[key] = nil end end
-            end
-        end
-        for id, item in pairs(markers) do if not present[id] then item.group:Destroy(); markers[id] = nil end end
-        participantsText.Text = #names &gt; 0 and (&quot;Peers: &quot;..table.concat(names, &quot;, &quot;)) or &quot;No other participants yet.&quot;
-    end
+	local function receive(peers)
+		local present = {}; local names = {}
+		for _, peer in ipairs(peers) do
+			present[peer.id] = true; table.insert(names, peer.name)
+			if enabled then
+				local item = markers[peer.id] or marker(peer); markers[peer.id] = item
+				item.target = vector(peer.position); item.targetLook = vector(peer.look); item.label.Text = peer.name; item.seen = os.clock()
+				item.selection = {}; for _, key in ipairs(peer.selected or {}) do item.selection[key] = true end
+				for key, box in pairs(item.boxes) do if not item.selection[key] then box:Destroy(); item.boxes[key] = nil end end
+			end
+		end
+		for id, item in pairs(markers) do if not present[id] then item.group:Destroy(); markers[id] = nil end end
+		participantsText.Text = #names > 0 and ("Peers: "..table.concat(names, ", ")) or "No other participants yet."
+	end
 
-    local function cameraState()
-        local camera = workspace.CurrentCamera; if not camera then return nil end
-        local position = camera.CFrame.Position; local look = camera.CFrame.LookVector
-        local hit = workspace:Raycast(position, Vector3.new(0, -512, 0))
-        local ground = hit and hit.Position + Vector3.new(0, .12, 0) or position - Vector3.new(0, 3, 0)
-        local selected = {}
-        for _, obj in ipairs(game:GetService(&quot;Selection&quot;):Get()) do
-            local key = ids[obj]
-            if key and obj:IsDescendantOf(workspace) and (obj:IsA(&quot;BasePart&quot;) or obj:IsA(&quot;Model&quot;)) then table.insert(selected, key); if #selected &gt;= 32 then break end end
-        end
-        return {position = {position.X, position.Y, position.Z}, look = {look.X, look.Y, look.Z}, ground = {ground.X, ground.Y, ground.Z}, selected = selected}
-    end
+	local function cameraState()
+		local camera = workspace.CurrentCamera; if not camera then return nil end
+		local position = camera.CFrame.Position; local look = camera.CFrame.LookVector
+		local hit = workspace:Raycast(position, Vector3.new(0, -512, 0))
+		local ground = hit and hit.Position + Vector3.new(0, .12, 0) or position - Vector3.new(0, 3, 0)
+		local selected = {}
+		for _, obj in ipairs(game:GetService("Selection"):Get()) do
+			local key = ids[obj]
+			if key and obj:IsDescendantOf(workspace) and (obj:IsA("BasePart") or obj:IsA("Model")) then table.insert(selected, key); if #selected >= 32 then break end end
+		end
+		return {position = {position.X, position.Y, position.Z}, look = {look.X, look.Y, look.Z}, ground = {ground.X, ground.Y, ground.Z}, selected = selected}
+	end
 
-    presenceToggle.Text = enabled and &quot;Peer Cursors: On&quot; or &quot;Peer Cursors: Off&quot;
-    local toggleConnection = presenceToggle.MouseButton1Click:Connect(function()
-        enabled = not enabled; plugin:SetSetting(&quot;PTShowParticipants&quot;, enabled)
-        presenceToggle.Text = enabled and &quot;Peer Cursors: On&quot; or &quot;Peer Cursors: Off&quot;
-        if not enabled then clear() end
-    end)
+	presenceToggle.Text = enabled and "Peer Cursors: On" or "Peer Cursors: Off"
+	local toggleConnection = presenceToggle.MouseButton1Click:Connect(function()
+		enabled = not enabled; plugin:SetSetting("PTShowParticipants", enabled)
+		presenceToggle.Text = enabled and "Peer Cursors: On" or "Peer Cursors: Off"
+		if not enabled then clear() end
+	end)
 
-    local renderConnection = Run.RenderStepped:Connect(function(dt)
-        if not active or Run:IsRunning() or not enabled then if folder then clear() end; return end
-        local blend = 1 - math.exp(-12 * math.min(dt, .1))
-        for id, item in pairs(markers) do
-            if os.clock() - item.seen &gt; 12 then item.group:Destroy(); markers[id] = nil
-            else
-                item.position = item.position:Lerp(item.target, blend); item.look = item.look:Lerp(item.targetLook, blend)
-                item.sphere.CFrame = workspace.Terrain.CFrame:ToObjectSpace(CFrame.new(item.position))
-                item.direction.Visible = item.look.Magnitude &gt; .01
-                if item.look.Magnitude &gt; .01 then item.direction.CFrame = workspace.Terrain.CFrame:ToObjectSpace(CFrame.lookAt(item.position, item.position + item.look)); item.direction.Length = 4 end
-                item.caption.StudsOffsetWorldSpace = item.position - workspace.Terrain.Position + Vector3.new(0, 2.5, 0)
-                for key in pairs(item.selection) do
-                    local obj = objects[key]; local box = item.boxes[key]
-                    if obj and obj:IsDescendantOf(workspace) and (obj:IsA(&quot;BasePart&quot;) or obj:IsA(&quot;Model&quot;)) then
-                        if not box then box = Instance.new(&quot;SelectionBox&quot;); box.Name = &quot;SelectedObject&quot;; box.Color3 = item.tint; box.SurfaceColor3 = item.tint; box.SurfaceTransparency = .9; box.LineThickness = .04; box.Parent = item.group; item.boxes[key] = box end
-                        box.Adornee = obj
-                    elseif box then box:Destroy(); item.boxes[key] = nil end
-                end
-            end
-        end
-    end)
+	local renderConnection = Run.RenderStepped:Connect(function(dt)
+		if not active or Run:IsRunning() or not enabled then if folder then clear() end; return end
+		local blend = 1 - math.exp(-12 * math.min(dt, .1))
+		for id, item in pairs(markers) do
+			if os.clock() - item.seen > 12 then item.group:Destroy(); markers[id] = nil
+			else
+				item.position = item.position:Lerp(item.target, blend); item.look = item.look:Lerp(item.targetLook, blend)
+				item.sphere.CFrame = workspace.Terrain.CFrame:ToObjectSpace(CFrame.new(item.position))
+				item.direction.Visible = item.look.Magnitude > .01
+				if item.look.Magnitude > .01 then item.direction.CFrame = workspace.Terrain.CFrame:ToObjectSpace(CFrame.lookAt(item.position, item.position + item.look)); item.direction.Length = 4 end
+				item.caption.StudsOffsetWorldSpace = item.position - workspace.Terrain.Position + Vector3.new(0, 2.5, 0)
+				for key in pairs(item.selection) do
+					local obj = objects[key]; local box = item.boxes[key]
+					if obj and obj:IsDescendantOf(workspace) and (obj:IsA("BasePart") or obj:IsA("Model")) then
+						if not box then box = Instance.new("SelectionBox"); box.Name = "SelectedObject"; box.Color3 = item.tint; box.SurfaceColor3 = item.tint; box.SurfaceTransparency = .9; box.LineThickness = .04; box.Parent = item.group; item.boxes[key] = box end
+						box.Adornee = obj
+					elseif box then box:Destroy(); item.boxes[key] = nil end
+				end
+			end
+		end
+	end)
 
-    task.spawn(function()
-        while alive do
-            if active and loggedIn and not Run:IsRunning() then
-                local currentRoom = room.Text; local currentBase = base()
-                if previousRoom ~= currentRoom or previousBase ~= currentBase then clear() end
-                previousRoom = currentRoom; previousBase = currentBase
-                local payload = cameraState()
-                if payload then
-                    sending = true
-                    local ok, peers = pcall(function() return api(&quot;/rooms/&quot;..currentRoom..&quot;/presence&quot;, &quot;POST&quot;, payload) end)
-                    sending = false
-                    if alive and active and not Run:IsRunning() and currentRoom == room.Text and currentBase == base() then
-                        if ok then
-                            local rendered, reason = pcall(function() receive(peers) end)
-                            if not rendered then clear(); participantsText.Text = &quot;Peer cursors: &quot;..tostring(reason) end
-                        else participantsText.Text = &quot;Updating peer connection...&quot; end
-                    end
-                end
-            else
-                clear()
-                participantsText.Text = &quot;Participants will appear once connected.&quot;
-                if previousRoom and not sending then
-                    local oldRoom = previousRoom; local oldBase = previousBase
-                    previousRoom = nil; previousBase = nil
-                    if oldBase == base() then pcall(function() api(&quot;/rooms/&quot;..oldRoom..&quot;/presence&quot;, &quot;POST&quot;, {leave = true}) end) end
-                end
-            end
-            task.wait(.5)
-        end
-    end)
+	task.spawn(function()
+		while alive do
+			if active and loggedIn and not Run:IsRunning() then
+				local currentRoom = room.Text; local currentBase = base()
+				if previousRoom ~= currentRoom or previousBase ~= currentBase then clear() end
+				previousRoom = currentRoom; previousBase = currentBase
+				local payload = cameraState()
+				if payload then
+					sending = true
+					local ok, peers = pcall(function() return api("/rooms/"..currentRoom.."/presence", "POST", payload) end)
+					sending = false
+					if alive and active and not Run:IsRunning() and currentRoom == room.Text and currentBase == base() then
+						if ok then
+							local rendered, reason = pcall(function() receive(peers) end)
+							if not rendered then clear(); participantsText.Text = "Peer cursors: "..tostring(reason) end
+						else participantsText.Text = "Updating peer connection..." end
+					end
+				end
+			else
+				clear()
+				participantsText.Text = "Participants will appear once connected."
+				if previousRoom and not sending then
+					local oldRoom = previousRoom; local oldBase = previousBase
+					previousRoom = nil; previousBase = nil
+					if oldBase == base() then pcall(function() api("/rooms/"..oldRoom.."/presence", "POST", {leave = true}) end) end
+				end
+			end
+			task.wait(.5)
+		end
+	end)
 
-    plugin.Unloading:Connect(function() alive = false; renderConnection:Disconnect(); toggleConnection:Disconnect(); clear() end)
-end
-</ProtectedString></Properties></Item></roblox>
+	plugin.Unloading:Connect(function() alive = false; renderConnection:Disconnect(); toggleConnection:Disconnect(); clear() end)
+end]]></ProtectedString>
+			<bool name="Disabled">false</bool>
+			<Content name="LinkedSource"><null></null></Content>
+			<token name="RunContext">0</token>
+			<string name="ScriptGuid">{3E59CB32-C0C0-48B9-ADAF-D9C79E34A31A}</string>
+			<BinaryString name="AttributesSerialize"></BinaryString>
+			<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+			<bool name="DefinesCapabilities">false</bool>
+			<string name="Name">PlaceTogether</string>
+			<BinaryString name="SerializedOverrides"></BinaryString>
+			<int64 name="SourceAssetId">-1</int64>
+			<SharedString name="Tags">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
+		</Properties>
+	</Item>
+	<SharedStrings>
+		<SharedString md5="yuZpQdnvvUBOTYh1jqZ2cA=="></SharedString>
+	</SharedStrings>
+</roblox>
