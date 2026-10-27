@@ -13,7 +13,7 @@ You will need:
 
 ### 2. Install the Plugin
 
-Install the Place Together `.rbxm` plugin in Roblox Studio.
+Install the Place Together `.rbxmx` plugin in Roblox Studio.
 
 After installation, restart Roblox Studio if the plugin does not appear immediately.
 
