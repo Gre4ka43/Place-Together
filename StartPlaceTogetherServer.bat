@@ -1,296 +1,131 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <title>Cookie check</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        color-scheme: light dark;
-      }
+@echo off
+setlocal enabledelayedexpansion
+title PlaceTogether Server Launcher
 
-      body {
-        font-family: 'Inter', Helvetica, Arial, sans-serif;
-        background: light-dark(#F8F8F7, #191919);
-        color: light-dark(#1f1f1f, #e3e3e3);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        text-align: center;
-      }
+rem ============================================================
+rem  PlaceTogether - Universal Server Launcher (ASCII safe)
+rem  - server.py is searched ONLY next to this .bat
+rem  - Console NEVER closes on error (pause on every path)
+rem  - Works with Radmin VPN, Hamachi, LAN, ngrok, Porthole
+rem ============================================================
 
-      .container {
-        background: light-dark(#FFFFFF, #1F1F1F);
-        padding: 32px;
-        border-radius: 16px;
-        border: 1px solid light-dark(#E2E3E4, #3E3E3E);
-        max-width: min(80%, 500px);
-        width: 100%;
-        color: light-dark(#2B2D31, #D4D4D4);
-      }
+set "PORT=8787"
 
-      h1 {
-        font-size: 20px;
-        font-weight: 500;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        color: light-dark(#2B2D31, #D4D4D4);
-      }
+rem --- Server file: ONLY next to this bat ---------------------
+set "SRV=%~dp0server.py"
 
-      p {
-        font-size: 14px;
-        color: light-dark(#2B2D31, #D4D4D4);
-        line-height: 21px;
-        margin: 0 0 1.5rem 0;
-      }
+if not exist "%SRV%" (
+    echo.
+    echo   ====================================================
+    echo    [ERROR] server.py not found
+    echo   ====================================================
+    echo.
+    echo   Expected file:
+    echo     %SRV%
+    echo.
+    echo   Put server.py into the SAME folder as this .bat:
+    echo     %~dp0
+    echo.
+    pause
+    exit /b 1
+)
 
-      .icon {
-        margin-bottom: 1rem;
-        line-height: 0;
-      }
+rem --- Find Python: PATH, py launcher, portable folder --------
+set "PY_CMD="
 
-      .button-container {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 2rem;
-      }
+python --version >nul 2>&1
+if not errorlevel 1 set "PY_CMD=python"
 
-      button {
-        background-color: light-dark(#fff, #323232);
-        color: light-dark(#2B2D31, #FCFCFC);
-        border: 1px solid light-dark(#E2E3E4, #3E3E3E);
-        border-radius: 12px;
-        padding: 8px 12px;
-        font-size: 14px;
-        line-height: 21px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        font-weight: 400;
-        font-family: 'Inter', Helvetica, Arial, sans-serif;
-        width: 100%;
-      }
+if not defined PY_CMD (
+    py -3 --version >nul 2>&1
+    if not errorlevel 1 set "PY_CMD=py -3"
+)
 
-      button:hover {
-        background-color: light-dark(#EAEAEB, #424242);
-      }
+if not defined PY_CMD if exist "%~dp0python_embed\python.exe" (
+    set "PY_CMD=%~dp0python_embed\python.exe"
+)
 
-      .hidden {
-        display: none;
-      }
+if not defined PY_CMD (
+    echo.
+    echo   ====================================================
+    echo    [ERROR] Python not found
+    echo   ====================================================
+    echo.
+    echo   Tried: python, py -3, %~dp0python_embed\python.exe
+    echo.
+    echo   Install Python 3.10+ from https://www.python.org/downloads/
+    echo   and tick "Add python.exe to PATH" during installation.
+    echo.
+    pause
+    exit /b 1
+)
 
-      /* Loading Spinner Animation */
-      .spinner {
-        margin: 0 auto 1.5rem auto;
-        width: 40px;
-        height: 40px;
-        border: 4px solid light-dark(#f0f0f0, #262626);
-        border-top: 4px solid light-dark(#076eff, #87a9ff); /* Blue color */
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
+rem --- Detect network IPs (errors suppressed) -----------------
+set "RADMIN_IP="
+set "HAMACHI_IP="
+set "LAN_IP="
 
-      .logo {
-        border-radius: 10px;
-        display: block;
-        margin: 0 auto 2rem auto;
-      }
+for /f "usebackq tokens=* delims=" %%a in (`powershell -NoProfile -Command "try { (Get-NetIPAddress -InterfaceAlias '*Radmin*' -AddressFamily IPv4 -ErrorAction Stop | Select-Object -First 1).IPAddress } catch { '' }" 2^>nul`) do set "RADMIN_IP=%%a"
 
-      .logo.hidden {
-        display: none;
-      }
+for /f "usebackq tokens=* delims=" %%a in (`powershell -NoProfile -Command "try { (Get-NetIPAddress -InterfaceAlias '*Hamachi*' -AddressFamily IPv4 -ErrorAction Stop | Select-Object -First 1).IPAddress } catch { '' }" 2^>nul`) do set "HAMACHI_IP=%%a"
 
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <img
-        class="logo"
-        src="https://www.gstatic.com/images/branding/productlogos/ai_studio/v1/web-512dp/logo_ai_studio_color_1x_web_512dp.png"
-        alt="AI Studio Logo"
-        width="256"
-        height="256"
-      />
-      <div class="spinner"></div>
-      <div id="error-ui" class="hidden">
-        <div class="icon">
-          <svg
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="48px"
-            height="48px"
-            fill="#D73A49"
-          >
-            <path
-              d="M12,2C6.486,2,2,6.486,2,12s4.486,10,10,10s10-4.486,10-10S17.514,2,12,2z M13,17h-2v-2h2V17z M13,13h-2V7h2V13z"
-            />
-          </svg>
-        </div>
-        <div id="stepOne" class="text-container">
-          <h1>Action required to load your app</h1>
-          <p>
-            It looks like your browser is blocking a required security cookie, which is common on
-            older versions of iOS and Safari.
-          </p>
-          <div class="button-container">
-            <button id="authInSeparateWindowButton" onclick="redirectToReturnUrl(true)">Authenticate in new window</button>
-          </div>
-        </div>
-        <div id="stepTwo" class="text-container hidden">
-          <h1>Action required to load your app</h1>
-          <p>
-            It looks like your browser is blocking a required security cookie, which is common on
-            older versions of iOS and Safari.
-          </p>
-          <div class="button-container">
-            <button id="interactButton" onclick="redirectToReturnUrl(false)">Close and continue</button>
-          </div>
-        </div>
-        <div id="stepThree" class="text-container hidden">
-          <h1>Almost there!</h1>
-          <p>
-            Grant permission for the required security cookie below.
-          </p>
-          <div class="button-container">
-            <button id="grantPermissionButton" onclick="grantStorageAccess()">Grant permission</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script>
-      const AUTH_FLOW_TEST_COOKIE_NAME = '__SECURE-aistudio_auth_flow_may_set_cookies';
-      const COOKIE_VALUE = 'true';
+for /f "usebackq tokens=* delims=" %%a in (`powershell -NoProfile -Command "try { (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop | Where-Object { $_.InterfaceAlias -match 'Ethernet|Wi-Fi' -and $_.IPAddress -notmatch '^127\.' -and $_.IPAddress -notmatch '^169\.254\.' } | Select-Object -First 1).IPAddress } catch { '' }" 2^>nul`) do set "LAN_IP=%%a"
 
-      function getCookie(name) {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          let cookie = cookies[i].trim();
-          if (cookie.startsWith(name + '=')) {
-            return cookie.substring(name.length + 1);
-          }
-        }
-        return null;
-      }
+rem --- Try to open firewall port (optional, needs admin) ------
+set "FWOK=0"
+powershell -NoProfile -Command "try { if (-not (Get-NetFirewallRule -DisplayName 'PlaceTogether %PORT%' -ErrorAction SilentlyContinue)) { New-NetFirewallRule -DisplayName 'PlaceTogether %PORT%' -Direction Inbound -Action Allow -Protocol TCP -LocalPort %PORT% -Profile Any -ErrorAction Stop | Out-Null }; exit 0 } catch { exit 1 }" >nul 2>&1 && set "FWOK=1"
 
-      function setAuthFlowTestCookie() {
-        // Set the cookie's TTL to 1 minute. This is a short lived cookie because it is only used
-        // when the user does not have an auth token or their auth token needs to be reset.
-        // Making this cookie too long-lived allows the user to get into a state where they can't
-        // mint a new auth token.
-        document.cookie = `${AUTH_FLOW_TEST_COOKIE_NAME}=${COOKIE_VALUE}; Path=/; Secure; SameSite=None; Domain=${window.location.hostname}; Partitioned; Max-Age=60;`;
-      }
+echo.
+echo   ====================================================
+echo     PlaceTogether Server - ready for co-op
+echo   ====================================================
+echo.
+echo   Python       : !PY_CMD!
+echo   Server       : %SRV%
+echo   Port         : %PORT%
+echo.
 
-      /**
-       * Returns true if the test cookie is set, false otherwise.
-       */
-      function authFlowTestCookieIsSet() {
-        return getCookie(AUTH_FLOW_TEST_COOKIE_NAME) === COOKIE_VALUE;
-      }
+if defined RADMIN_IP  echo   [Radmin VPN]  : http://!RADMIN_IP!:%PORT%
+if defined HAMACHI_IP echo   [Hamachi]     : http://!HAMACHI_IP!:%PORT%
+if defined LAN_IP     echo   [LAN / Wi-Fi] : http://!LAN_IP!:%PORT%
+echo   [Localhost]   : http://127.0.0.1:%PORT%
+echo.
+echo   ----------------------------------------------------
+echo   WHAT TO PUT INTO THE ROBLOX STUDIO PLUGIN:
+echo   - Radmin VPN users  : copy the [Radmin VPN] address
+echo   - Hamachi users     : copy the [Hamachi] address
+echo   - ngrok / Porthole  : paste the public tunnel address
+echo   - Same PC testing   : http://127.0.0.1:%PORT%
+echo   ----------------------------------------------------
+echo.
 
-      /**
-       * Redirects to the return url. If autoClose is true, then the return url will be opened in a
-       * new window, and it will be closed automatically when the page loads.
-       * Options:
-       *   storageAccessGranted: if true, appends __storage_access_granted=1 to
-       *   the return url so the Lua auth script can set the test cookie
-       *   server-side (needed for Safari/iOS where document.cookie is blocked).
-       */
-      async function redirectToReturnUrl(autoClose, storageAccessGranted = false) {
-        const initialReturnUrlStr = new URLSearchParams(window.location.search).get('return_url');
-        const returnUrl = initialReturnUrlStr ? new URL(initialReturnUrlStr) : null;
+if "%FWOK%"=="0" (
+    echo   [i] Firewall rule was NOT created.
+    echo       If others cannot connect, run this .bat as Administrator,
+    echo       or allow port %PORT% manually in Windows Firewall.
+    echo.
+)
 
-        // Prevent potentially malicious URLs from being used
-        if (returnUrl.protocol.toLowerCase() === 'javascript:') {
-          console.error('Potentially malicious return URL blocked');
-          return;
-        }
+echo   Server is running. Press Ctrl+C to stop.
+echo.
 
-        if (storageAccessGranted) {
-          returnUrl.searchParams.set('__storage_access_granted', '1');
-        }
+rem --- Data file next to server.py ----------------------------
+for %%i in ("%SRV%") do set "SRVDIR=%%~dpi"
+set "DATA=%SRVDIR%data.json"
 
-        if (autoClose) {
-          returnUrl.searchParams.set('__auto_close', '1');
-          const url = new URL(window.location.href);
-          url.searchParams.set('return_url', returnUrl.toString());
-          // Land on the cookie check page first, so the user can interact with it before proceeding
-          // to the return url where cookies can be set.
-          window.open(url.toString(), '_blank');
-          const hasAccess = await document.hasStorageAccess();
-          document.querySelector('#stepOne').classList.add('hidden');
-          if (!hasAccess) {
-            document.querySelector('#stepThree').classList.remove('hidden');
-          } else {
-            window.location.reload();
-          }
-        } else {
-          window.location.href = returnUrl.toString();
-        }
-      }
+rem --- Run server (pause is guaranteed on any exit path) ------
+!PY_CMD! "%SRV%" --port %PORT% --data "%DATA%"
+set "EXITCODE=%errorlevel%"
 
-      /**
-       * Grants the browser permission to set cookies. If successful, then it redirects to the
-       * return url.
-       */
-      async function grantStorageAccess() {
-        try {
-          await document.requestStorageAccess();
-          // Recent Safari/iOS versions block document.cookie entirely in
-          // cross-site iframes, even after requestStorageAccess(). Only
-          // server-side Set-Cookie headers work. Signal to the Lua auth script
-          // via query param so it can set the test cookie server-side.
-          redirectToReturnUrl(false, /* storageAccessGranted= */ true);
-        } catch (err) {
-          console.log('error after button click: ', err);
-        }
-      }
-
-      /**
-       * Verifies that the browser can set cookies. If it can, then it redirects to the return url.
-       * If it can't, then it shows the error UI.
-       */
-      function verifyCanSetCookies() {
-        setAuthFlowTestCookie();
-        if (authFlowTestCookieIsSet()) {
-          // Check if we are on the auto-close flow, and if so show the interact button.
-          const returnUrl = new URLSearchParams(window.location.search).get('return_url');
-          const autoClose = new URL(returnUrl).searchParams.has('__auto_close');
-          if (autoClose) {
-            document.querySelector('#stepOne').classList.add('hidden');
-            document.querySelector('#stepTwo').classList.remove('hidden');
-          } else {
-            redirectToReturnUrl(false);
-            return;
-          }
-        }
-        // The cookie could not be set, so initiate the recovery flow.
-        document.querySelector('.logo').classList.add('hidden');
-        document.querySelector('.spinner').classList.add('hidden');
-        document.querySelector('#error-ui').classList.remove('hidden');
-      }
-
-      // Start the cookie verification process.
-      verifyCanSetCookies();
-    </script>
-  </body>
-</html>
+echo.
+echo   ====================================================
+echo     Server stopped. Exit code: %EXITCODE%
+echo   ====================================================
+echo.
+if not "%EXITCODE%"=="0" (
+    echo   The server exited with an error.
+    echo   Scroll up to read the Python traceback above.
+    echo.
+)
+pause
+endlocal
