@@ -90,6 +90,8 @@ class PlaceTogetherHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, bypass-tunnel-reminder")
+        # ЖЕСТКИЙ ЗАПРЕТ КЭШИРОВАНИЯ ДЛЯ ROBLOX STUDIO:
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
         self.send_header("Connection", "keep-alive")
         self.end_headers()
         self.wfile.write(body)
