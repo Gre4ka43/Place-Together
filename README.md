@@ -18,7 +18,7 @@ You will need:
 ### 2. Install the Plugin
 
 The easiest way to install everything is to open **Roblox Studio**, go to the **Plugins** tab, and click **Plugin Folder**. 
-Extract both the `.rbxmx` plugin file and the server `.bat` files into this folder to keep everything in one place.
+Extract both the `.rbxmx` plugin file and the server `.exe` files into this folder to keep everything in one place.
 
 After installation, restart Roblox Studio if the plugin does not appear immediately on your toolbar.
 
@@ -54,7 +54,7 @@ Make sure you only do this on a network and with people you trust. *(Don't forge
 
 ### 5. Start the Server
 
-The person hosting the session should run the provided `.bat` file.
+The person hosting the session should run the provided `.exe` file.
 
 A console window will open and start the Place Together server.
 
@@ -95,7 +95,7 @@ Players can then accept and join the collaborative session through the invitatio
 If the connection does not work, check the following:
 
 - Everyone is connected to the same virtual network.
-- The host is running the `.bat` server.
+- The host is running the `.exe` server.
 - The IP address entered in the plugin is exactly the IP displayed by the server console.
 - Windows Firewall is not blocking the server.
 - Everyone is using the same version of Place Together.
