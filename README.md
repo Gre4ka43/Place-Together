@@ -11,7 +11,7 @@ Download the latest release from the [Releases](https://github.com/Gre4ka43/Plac
 You will need:
 
 - **Place Together plugin** (`.rbxmx` file) - to install it in Roblox Studio.
-- **Server launcher** - the `.bat` file used to start the Place Together server.
+- **Server launcher** - the `.exe` file used to start the Place Together server.
 
 ---
 
