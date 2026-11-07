@@ -1,141 +1,56 @@
-# Place Together
+# PlaceTogether
 
-A custom plugin for Roblox Studio to enable collaborative game development (similar to Team Create) via local network connections.
+PlaceTogether is a self-hosted collaboration plugin for Roblox Studio. Work on a shared place with friends over a local network or VPN. One person runs the server, and everyone installs the Studio plugin.
 
-## Getting Started
+## Download
 
-### 1. Download Place Together
+Choose the package for the **server host's operating system**. Each clean package includes `PlaceTogether.rbxmx`, the server launcher, and a short setup guide. [Releases](https://github.com/Gre4ka43/Place-Together/releases)
 
-Download the latest release from the [Releases](https://github.com/Gre4ka43/Place-Together/releases) page.
+| Host OS | Server launcher | Requirements |
+|---|---|---|
+| Windows | `PlaceTogetherServerDesktop.exe` | Runs without installing Python |
+| Linux | `python3 PlaceTogetherServer.pyz` | Python 3.12 or newer, Tk, and a graphical session |
+| macOS | `PlaceTogether Server.app` | Python 3.12 or newer with Tk |
 
-You will need:
+The Linux and macOS packages require Python on the host. Roblox Studio and the plugin are required on each editing computer.
 
-- **Place Together plugin** (`.rbxmx` file) - to install it in Roblox Studio.
-- **Server launcher** - the `.exe` file used to start the Place Together server.
+## Set up a session
 
----
+### 1. Install the plugin
 
-### 2. Install the Plugin
+In Roblox Studio, open **Plugins → Plugin Folder** and copy `PlaceTogether.rbxmx` into that folder. Restart Studio and open **PlaceTogether** from the Plugins toolbar. Keep the server files in their own folder.
 
-The easiest way to install everything is to open **Roblox Studio**, go to the **Plugins** tab, and click **Plugin Folder**. 
-Extract both the `.rbxmx` plugin file and the server `.exe` files into this folder to keep everything in one place.
+When Studio asks for permission, allow HTTP requests so the plugin can reach your server. Allow script injection if you want to synchronize script contents.
 
-After installation, restart Roblox Studio if the plugin does not appear immediately on your toolbar.
+### 2. Start the server
 
-> **⚠️ IMPORTANT:** Upon first use, Roblox Studio may ask for permission to allow **HTTP Requests** and **Script Injection** for Place Together. You **MUST** click 'Allow', otherwise the plugin will not function and cannot sync your project.
+The host opens the server app, clicks **Start**, and leaves it running. The **Connection** tab shows the IP addresses and port. Use **Copy** next to a value or select the text and copy it.
 
----
+| Who is connecting | IP / Host in plugin Settings |
+|---|---|
+| Host, on the same computer as the server | `127.0.0.1` |
+| Teammate, on another computer | The host's IP on your shared LAN or VPN |
 
-### 3. Connect Everyone to the Same Network
+Enter the port shown in the server app. The default is `8787`. If the host configured a server password, everyone enters it in the plugin's **Settings**.
 
-Place Together currently requires all participants to be able to connect to the host's computer.
+### 3. Host and join by room code
 
-The easiest way is to use a virtual LAN/networking application. You can use any of these:
+**Standard session.** The host opens the place to share and chooses **Together → Host New Session**. Once the room is ready, copy its room code and send it to your teammates. Each teammate opens a fresh Baseplate, enters the code under **Together**, and chooses **Join by Room Code**. Keep a separate local copy of any place you want to preserve.
 
-- [Radmin VPN](https://www.radmin-vpn.com/) — creates a virtual local network between participants.
-- [Hamachi](https://vpn.net/) — another popular virtual LAN solution.
-- [Porthole - Local Port Sharing](https://store.steampowered.com/app/4963920/Porthole_Local_Port_Sharing/) — a newer alternative that can make local services accessible to your friends without port forwarding.
+**Same Copy.** Use this when everyone already has the same saved copy of the place. The host chooses **Host Same Copy** and teammates open their matching copies and choose **Join Same Copy** with the room code. This skips the initial map transfer. Large places may still need time to index local objects. The progress display shows the current stage and object count.
 
-**Everyone who wants to participate should join the same virtual network/lobby.**
+## What you can do
 
----
+- Sync edits to supported objects, including parts, GUI, scripts, and Terrain.
+- See teammate presence and supported live drag updates during editing.
+- Open the **Team Test** tab for a shared walkthrough with R6 characters. Walkthrough runs in Edit mode and supports movement, camera controls, and collisions. Game scripts and Roblox server physics require a separate Studio playtest.
 
-### 4. Check Windows Firewall
+PlaceTogether is in early development. Save local copies of important places. Coordinate edits when working on the same script because overlapping changes may need to be resolved manually.
 
-Windows Firewall may prevent other players from connecting to the Place Together server.
+## Troubleshooting
 
-If you cannot connect, check your Windows Firewall settings and allow the server through the firewall.
+- **A teammate cannot connect.** Check that the server is running and both computers can reach each other over the same LAN or VPN. Verify the host IP, port, and password in **Settings**. On Windows, allow the server or its TCP port through the firewall for the network you are using.
+- **A room is still preparing.** Wait for the host to finish uploading or indexing the place. For a large place that everyone already has, use **Same Copy**.
+- **The plugin is missing or cannot sync.** Restart Studio, check the plugin permissions, and confirm everyone is using the same plugin version.
 
-For testing, you can temporarily disable Windows Firewall, but **this is not recommended for normal use**. It is safer to create a firewall rule allowing the required server application/port.
-
-Make sure you only do this on a network and with people you trust. *(Don't forget to turn the firewall back on after you finish working!)*
-
----
-
-### 5. Start the Server
-
-The person hosting the session should run the provided `.exe` file.
-
-A console window will open and start the Place Together server.
-
-After the server starts, **the console will explicitly display an IP address**.
-
-Copy this IP address from the console and send it to the people who want to connect.
-
-> **Important:** The IP displayed by the server console is the exact address that both the host and other participants need to enter in the Place Together plugin settings.
-
----
-
-### 6. Connect to the Server
-
-The player who wants to join should:
-
-1. Open Roblox Studio.
-2. **Open an empty Baseplate.** 
-   > **⚠️ WARNING:** When joining someone else's session, *always* open an empty Baseplate. Do not open your existing local places, as their contents will be overwritten and mixed with the host's map.
-3. Open the **Place Together** plugin.
-4. Open the plugin settings.
-5. Enter the **IP address displayed in the host's server console**.
-6. Connect to the server.
-
-Make sure the player is connected to the same virtual network as the host.
-
----
-
-### 7. Invite Each Other
-
-Once connected to the server, use the Place Together plugin (as the Host) to **invite other players by their Roblox username**.
-
-Players can then accept and join the collaborative session through the invitation.
-
----
-
-### 8. Connection Problems
-
-If the connection does not work, check the following:
-
-- Everyone is connected to the same virtual network.
-- The host is running the `.exe` server.
-- The IP address entered in the plugin is exactly the IP displayed by the server console.
-- Windows Firewall is not blocking the server.
-- Everyone is using the same version of Place Together.
-
-#### Try switching the host
-
-Sometimes a connection may not work correctly **from the host to another player** due to NAT types or ISP restrictions.
-
-If this happens, try having the other player **host the server instead** and invite the original host.
-
-For example:
-
-**Host A → Player B doesn't work**
-
-Try:
-
-**Host B → Player A**
-
-The connection may work perfectly in the opposite direction depending on your specific network configuration.
-
----
-
-## ⚠️ Early Development & Limitations ⚠️
-
-Place Together is still in early development. 
-
-**Currently Supported:** 
-- Parts creation, movement, and editing
-- Terrain generation and editing
-- GUI synchronization
-- Script synchronization
-- Toolbox assets loading
-
-**Current Limitations & Known Issues:**
-- Team Test is currently **not** supported.
-- **Simultaneous Script Editing:** If two people edit the exact same script at the same time, the later save will overwrite the other developer's changes. Please edit different scripts or communicate before modifying code.
-
-You may also encounter:
-- Bugs and crashes
-- Connection problems or synchronization delays depending on your network
-- Unexpected behavior
-
-If you encounter a problem, please report it through the GitHub repository's **Issues** tab (including the error text from the server console) so it can be investigated and fixed.
+For bug reports, include your operating system, plugin version, steps to reproduce, and relevant Studio Output or server logs. Export server logs from **Logs → Export TXT**. [Issues](https://github.com/Gre4ka43/Place-Together/issues)
